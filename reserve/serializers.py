@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Customer,Barber
+from .models import *
 from django.contrib.auth.password_validation import validate_password
 from rest_framework.exceptions import ValidationError
 
@@ -40,14 +40,24 @@ class BarberSignupSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Barber
-        fields = ['id','user', 'first_name', 'last_name', 'salon', 'services_offered','created_at']
+        fields = ['id','user', 'first_name', 'last_name', 'created_at']
 
     def create(self, validated_data):
         user_data = validated_data.pop('user')
         user_serializer = UserSerializer(data=user_data)
         if user_serializer.is_valid(raise_exception=True):
             user = user_serializer.save()
-            barber = Barber.objects.create(user=user, **validated_data)
+            if 'experience_years' in validated_data:
+                experience_years = validated_data.pop('experience_years')
+            else:
+                experience_years = 0  
+
+            barber = Barber.objects.create(user=user, experience_years=experience_years, **validated_data)
+            salons_data = self.initial_data.get('salons')
+            if salons_data:
+                for salon_id in salons_data:
+                    salon = Salon.objects.get(pk=salon_id)
+                    barber.salons.add(salon)
             return barber
     
 class CustomerSignupSerializer(serializers.ModelSerializer):

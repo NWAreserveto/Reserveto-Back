@@ -3,54 +3,109 @@ from django.test import TestCase
 from rest_framework import status
 import uuid
 from django.urls import reverse
-from .models import PasswordReset
+from .models import *
 from django.contrib.auth.models import User
 from rest_framework.test import APIClient
 from rest_framework.test import APITestCase
 # from .views import send_verification_email
 from unittest.mock import patch
 
+
 class LoginAPITest(TestCase):
     def setUp(self):
         self.client = APIClient()
-        self.user = User.objects.create_user(username='testuser', password='password123')
-
+        self.user = User.objects.create_user(username='testuser', password='Password123')
+        self.customer = Customer.objects.create(user=self.user)
+        
     def test_login_valid_credentials(self):
-        response = self.client.post('/api/login/', {'username': 'testuser', 'password': 'password123'}, format='json')
+        response = self.client.post('/api/Customerlogin/', {'username': 'testuser', 'password': 'Password123'}, format='json')
         self.assertEqual(response.status_code, 200)
         self.assertIn('access', response.data)
         self.assertIn('refresh', response.data)
+        self.assertIn('role', response.data)
+        self.assertEqual(response.data['role'], 'customer')
 
     def test_login_invalid_credentials(self):
-        response = self.client.post('/api/login/', {'username': 'testuser', 'password': 'wrongpassword'}, format='json')
+        response = self.client.post('/api/Customerlogin/', {'username': 'testuser', 'password': 'wrongpassword'}, format='json')
         self.assertEqual(response.status_code, 401)
-class SignupAPITest(TestCase):
+
+class BarberSignupAPITest(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        salon = Salon.objects.create(name="Doe's Barbershop", address="123 Main Street", phone_number="+1234567890")
+        service_offered = Service.objects.create(name='Haircut', description='A simple haircut', price=20.00, duration=timezone.timedelta(minutes=30), salon=salon) 
+        self.valid_data = {
+            'user': {
+                'username': 'testbarber',
+                'email': 'barber@test.com',
+                'password': 'Mohammad13822003',
+                'confirm_password': 'Mohammad13822003'
+            },
+            'first_name': 'John',
+            'last_name': 'Doe',
+        }
+        self.valid_data['salon'] = [salon.pk]
+
+    def test_barber_signup_valid_credentials(self):
+        response = self.client.post('/api/BarberSignup/', self.valid_data, format='json')
+        print(response.data)
+        self.assertEqual(response.status_code, 201)
+        self.assertIn('access', response.data)
+        self.assertIn('refresh', response.data)
+        self.assertIn('barber', response.data)
+        self.assertEqual(response.data['barber']['first_name'], 'John')
+        self.assertEqual(response.data['barber']['last_name'], 'Doe')
+
+    def test_barber_signup_duplicate_user(self):
+        existing_user = User.objects.create_user(username='testbarber', email='barber@test.com', password='Password123')
+        response = self.client.post('/api/BarberSignup/', self.valid_data, format='json')
+        self.assertEqual(response.status_code, 400)
+
+    def test_barber_signup_missing_field(self):
+        invalid_data = self.valid_data.copy()
+        del invalid_data['first_name']
+        response = self.client.post('/api/BarberSignup/', invalid_data, format='json')
+        self.assertEqual(response.status_code, 400)  
+
+
+class CustomerSignupAPITest(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.valid_data = {
-            'username': 'testuser',
-            'email': 'h1234@gmail.com',
-            'password': 'password123',
+            'user': {
+                'username': 'testcustomer',
+                'email': 'customer@test.com',
+                'password': 'Mohammad13822003',
+                'confirm_password': 'Mohammad13822003'
+            },
+            'first_name': 'Jane',
+            'last_name': 'Smith',
+            'phone_number': '+1234567890',
+            'address': '123 Main St, City',
         }
 
-    def test_signup_valid_credentials(self):
-        response = self.client.post('/api/signup/', self.valid_data, format='json')
-        self.assertEqual(response.status_code, 201)  
+    def test_customer_signup_valid_credentials(self):
+        response = self.client.post('/api/CustomerSignup/', self.valid_data, format='json')
+        self.assertEqual(response.status_code, 201)
         self.assertIn('access', response.data)
         self.assertIn('refresh', response.data)
+        self.assertIn('customer', response.data)
+        self.assertEqual(response.data['customer']['first_name'], 'Jane')
+        self.assertEqual(response.data['customer']['last_name'], 'Smith')
+        self.assertEqual(response.data['customer']['phone_number'], '+1234567890')
+        self.assertEqual(response.data['customer']['address'], '123 Main St, City')
 
-    def test_signup_duplicate_user(self):
+    def test_customer_signup_duplicate_user(self):
+        existing_user = User.objects.create_user(username='testcustomer', email='customer@test.com', password='Password123')
+        response = self.client.post('/api/CustomerSignup/', self.valid_data, format='json')
+        self.assertEqual(response.status_code, 400)
 
-        existing_user = User.objects.create_user(**self.valid_data) 
-        response = self.client.post('/api/signup/', self.valid_data, format='json')
-        self.assertEqual(response.status_code, 400)  
-
-
-    def test_signup_missing_field(self):
+    def test_customer_signup_missing_field(self):
         invalid_data = self.valid_data.copy()
-        del invalid_data['username']
-        response = self.client.post('/api/signup/', invalid_data, format='json')
-        self.assertEqual(response.status_code, 400)  
+        del invalid_data['first_name']
+        response = self.client.post('/api/CustomerSignup/', invalid_data, format='json')
+        self.assertEqual(response.status_code, 400)
+    
 
 class PasswordResetAPITest(APITestCase):
     def setUp(self):
