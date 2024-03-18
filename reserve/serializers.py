@@ -40,7 +40,7 @@ class BarberSignupSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Barber
-        fields = ['id','user', 'first_name', 'last_name', 'created_at']
+        fields = ['id','user', 'first_name', 'last_name', 'phone_number','created_at']
 
     def create(self, validated_data):
         user_data = validated_data.pop('user')
@@ -65,7 +65,7 @@ class CustomerSignupSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Customer
-        fields = ['id', 'user','first_name','last_name', 'phone_number', 'address', 'created_at']
+        fields = ['id', 'user', 'created_at']
 
     def create(self, validated_data):
         user_data = validated_data.pop('user')

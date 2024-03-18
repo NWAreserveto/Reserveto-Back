@@ -32,7 +32,7 @@ class LoginAPIView(APIView):
                     role = "barber"
                 elif is_customer:
                     role = "customer"
-                    return Response({
+                return Response({
                     'refresh': str(refresh),
                     'access': str(refresh.access_token),
                     'role': role
