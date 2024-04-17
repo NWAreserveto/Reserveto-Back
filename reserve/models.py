@@ -42,9 +42,9 @@ class Barber(models.Model):
     last_name = models.CharField(max_length = 256)
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     phone_number = models.CharField(max_length=20)
-    salons = models.ManyToManyField(Salon, related_name='barbers')  
+    salons = models.ManyToManyField(Salon, related_name='barbers', null=True, blank=True)  
     experience_years = models.IntegerField()
-    services_offered = models.ManyToManyField(Service)
+    services_offered = models.ManyToManyField(Service, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     is_admin = models.BooleanField(default=False)  # Admin flag for barbers
     bio = models.TextField(blank=True, null=True)
