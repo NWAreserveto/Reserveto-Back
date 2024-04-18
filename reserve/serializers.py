@@ -13,6 +13,8 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ['username', 'email', 'password', 'confirm_password']
         extra_kwargs = {'password': {'write_only': True}}
 
+
+
     def validate_password(self, value):
         try:
             validate_password(value)
@@ -20,16 +22,44 @@ class UserSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(str(exc))
         return value
     
+    def validate_username(self, value):
+        # If this is an update operation and the username hasn't changed, skip the uniqueness check
+        if self.instance and self.instance.username == value:
+            return value
+
+        # Check for uniqueness
+        if User.objects.filter(username=value).exists():
+            raise serializers.ValidationError("A user with that username already exists .")
+        return value
+    
     def validate(self, data):
-        if data['password'] != data['confirm_password']:
-            raise serializers.ValidationError({"password": "Password and Confirm Password do not match."})
+        if 'password' in data and 'confirm_password' in data:
+            if data['password'] != data['confirm_password']:
+                raise serializers.ValidationError({"password": "Password and Confirm Password do not match."})
         return data
 
     def create(self, validated_data):
         validated_data.pop('confirm_password', None)
         user = User.objects.create_user(**validated_data)
         return user
+    
 
+def update(self, instance, validated_data):
+    new_username = validated_data.get('username')
+    if new_username and new_username != instance.username:
+        if User.objects.filter(username=new_username).exists():
+            raise serializers.ValidationError("A user with that username already exists.")
+        instance.username = new_username
+
+    instance.email = validated_data.get('email', instance.email)
+
+    new_password = validated_data.get('password')
+    if new_password:
+        instance.set_password(new_password)
+
+    instance.save()
+    return instance
+        
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField()
     password = serializers.CharField(style={'input_type': 'password'}, write_only=True)
@@ -41,6 +71,25 @@ class BarberSignupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Barber
         fields = ['id','user', 'first_name', 'last_name', 'phone_number','created_at']
+
+
+        def update(self, instance, validated_data):
+            # Extract the user data from the validated data
+            user_data = validated_data.pop('user', None)
+
+            # Update the User instance if user data is provided
+            if user_data:
+                user = instance.user
+                user_serializer = UserSerializer(user, data=user_data, partial=True)
+                if user_serializer.is_valid(raise_exception=True):
+                    user = user_serializer.save()
+
+            # Update the Barber instance
+            for attr, value in validated_data.items():
+                setattr(instance, attr, value)
+            instance.save()
+
+            return instance
 
     def create(self, validated_data):
         user_data = validated_data.pop('user')
@@ -83,3 +132,30 @@ class PasswordResetSerializer(serializers.Serializer):
         if data['password'] != data['confirm_password']:
             raise serializers.ValidationError("Passwords do not match")
         return data
+
+class SalonSerializer(serializers.ModelSerializer):
+    barber = serializers.PrimaryKeyRelatedField(queryset=Barber.objects.all(), write_only=True, many=True)
+
+    class Meta:
+        model = Salon
+        fields = ['id', 'name', 'address', 'phone_number', 'barber']
+
+    def create(self, validated_data):
+        barbers = validated_data.pop('barber')
+        salon = Salon.objects.create(**validated_data)
+        for barber in barbers:
+            barber.salons.add(salon)
+        return salon
+    
+    def update(self, instance, validated_data):
+        barbers = validated_data.pop('barber')
+        instance.name = validated_data.get('name', instance.name)
+        instance.address = validated_data.get('address', instance.address)
+        instance.phone_number = validated_data.get('phone_number', instance.phone_number)
+        instance.save()
+
+        # Clear the existing barbers and add the new ones
+        instance.barbers.clear()
+        for barber in barbers:
+            barber.salons.add(instance)
+        return instance
