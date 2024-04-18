@@ -94,24 +94,24 @@ WSGI_APPLICATION = 'Reserveto.wsgi.application'
 #         'NAME': BASE_DIR / 'db.sqlite3',
 #     }
 # }
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'Reserveto',
-#         'USER': 'postgres',
-#         'PASSWORD': '13822003',
-#         'HOST': 'localhost',
-#         'PORT': '5432',
-#     }
-# }
-
-import dj_database_url
-# Replace the SQLite DATABASES configuration with PostgreSQL:
 DATABASES = {
-    'default': dj_database_url.config(
-                # Replace this value with your local database's connection string. 
-                default='postgres://database_t14q_user:5eJY1UjetomZjjkIyNlNGEPwOO8ai1yC@dpg-co6nmva0si5c73cjg0f0-a.oregon-postgres.render.com/database_t14q', 
-                conn_max_age=600    )}
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'Reserveto',
+        'USER': 'postgres',
+        'PASSWORD': '13822003',
+        'HOST': 'localhost',
+        'PORT': '5432',
+    }
+}
+
+# import dj_database_url
+# # Replace the SQLite DATABASES configuration with PostgreSQL:
+# DATABASES = {
+#     'default': dj_database_url.config(
+#                 # Replace this value with your local database's connection string. 
+#                 default='postgres://database_t14q_user:5eJY1UjetomZjjkIyNlNGEPwOO8ai1yC@dpg-co6nmva0si5c73cjg0f0-a.oregon-postgres.render.com/database_t14q', 
+#                 conn_max_age=600    )}
 
 
 
@@ -157,11 +157,12 @@ USE_L10N = True
 
 USE_TZ = True
 
-BASE_URL = "http://127.0.0.1:8000/"
+BASE_URL = "https://reserveto-back.onrender.com"
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_USE_TLS = True
+EMAIL_PORT = 587
 EMAIL_HOST_USER = 'klahouti81@gmail.com'
 EMAIL_HOST_PASSWORD = 'wsyw vwtd nvzh bttk'
 EMAIL_USE_SSL = False
