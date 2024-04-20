@@ -7,6 +7,7 @@ from .serializers import *
 from django.shortcuts import get_object_or_404
 from .serializers import *
 from .models import PasswordReset
+# from .models import Landing
 import uuid
 from .models import *
 from django.contrib.auth.models import User
@@ -226,3 +227,9 @@ class CustomerProfileViewSet(viewsets.ModelViewSet):
 
     def perform_update(self, serializer):
         serializer.save(customer=self.request.user.customer)
+
+class LandingViewSet(viewsets.ModelViewSet):
+    def get_page(self):
+        landing = Landing.objects.all()
+        serializer = LandingSerializer(landing)
+        return Response(serializer.data)

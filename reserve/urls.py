@@ -21,4 +21,5 @@ urlpatterns = [
     path('', include(salon_router.urls)),
     path('', include(barber_profile_router.urls)),
     path('', include(customer_profile_router.urls)),
+    path('Home',LandingViewSet.get_page)
 ]
