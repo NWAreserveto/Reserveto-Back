@@ -228,8 +228,12 @@ class CustomerProfileViewSet(viewsets.ModelViewSet):
     def perform_update(self, serializer):
         serializer.save(customer=self.request.user.customer)
 
-class LandingViewSet(viewsets.ModelViewSet):
-    def get_page(self):
-        landing = Landing.objects.all()
-        serializer = LandingSerializer(landing)
-        return Response(serializer.data)
+class LandingUPViewSet(generics.ListAPIView):
+    queryset = LandingUP.objects.all()
+    serializer_class = LandingUPSerializer
+class LandingMidViewSet(generics.ListAPIView):
+    queryset = LandingMid.objects.all()
+    serializer_class = LandingMidSerializer
+class LandingDownViewSet(generics.ListAPIView):
+    queryset = LandingDown.objects.all()
+    serializer_class = LandingDownSerializer

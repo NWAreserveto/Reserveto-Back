@@ -160,7 +160,16 @@ class SalonSerializer(serializers.ModelSerializer):
             barber.salons.add(instance)
         return instance
     
-class LandingSerializer(serializers.Serializer):
-    title = serializers.CharField(max_length = 256)
-    description = serializers.CharField(max_length = None)
-    landing_image = serializers.ImageField()
+class LandingUPSerializer(serializers.ModelSerializer):
+    class Meta:
+        model =LandingUP
+        fields = '__all__'
+class LandingMidSerializer(serializers.ModelSerializer):
+    class Meta:
+        model =LandingMid
+        fields = '__all__'
+
+class LandingDownSerializer(serializers.ModelSerializer):
+    class Meta:
+        model =LandingDown
+        fields = '__all__'
