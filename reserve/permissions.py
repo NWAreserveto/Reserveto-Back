@@ -80,4 +80,4 @@ class IsCustomerOwnerWithJWT(permissions.BasePermission):
         has_valid_jwt = request.user.is_authenticated
 
         # Check if the user is the owner of the profile
-        return is_customer and has_valid_jwt and obj.customer == request.user.customer
+        return is_customer and has_valid_jwt and obj == request.user.customer
