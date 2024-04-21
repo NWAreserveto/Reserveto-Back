@@ -109,6 +109,14 @@ class BarberSignupSerializer(serializers.ModelSerializer):
                     barber.salons.add(salon)
             return barber
     
+
+class BarberSerializer(serializers.ModelSerializer):
+    user = UserSerializer()
+
+    class Meta:
+        model = Barber
+        fields ='__all__'
+
 class CustomerSignupSerializer(serializers.ModelSerializer):
     user = UserSerializer()
 
@@ -124,6 +132,14 @@ class CustomerSignupSerializer(serializers.ModelSerializer):
             customer = Customer.objects.create(user=user, **validated_data)
             return customer
     
+
+
+class CustomerSerializer(serializers.ModelSerializer):
+    user = UserSerializer()
+
+    class Meta:
+        model = Customer
+        fields ='__all__'
 class PasswordResetSerializer(serializers.Serializer):
     password = serializers.CharField()
     confirm_password = serializers.CharField()
