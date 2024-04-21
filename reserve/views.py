@@ -165,7 +165,7 @@ class SalonViewSet(BarberAdminMixin, mixins.ListModelMixin,
 
 class BarberProfileViewSet(viewsets.ModelViewSet):
     queryset = Barber.objects.all()
-    serializer_class = BarberSignupSerializer
+    serializer_class = BarberSerializer
 
     def get_permissions(self):
         if self.action in ['update', 'partial_update', 'destroy']:
@@ -212,7 +212,7 @@ class BarberProfileViewSet(viewsets.ModelViewSet):
 
 class CustomerProfileViewSet(viewsets.ModelViewSet):
     queryset = Customer.objects.all()
-    serializer_class = CustomerSignupSerializer
+    serializer_class = CustomerSerializer
 
     def get_permissions(self):
         if self.action in ['update', 'partial_update', 'destroy']:
