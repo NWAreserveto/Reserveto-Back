@@ -44,6 +44,7 @@ class Barber(models.Model):
     phone_number = models.CharField(max_length=20)
     salons = models.ManyToManyField(Salon, related_name='barbers', null=True, blank=True)  
     experience_years = models.IntegerField()
+    location = models.TextField(max_length=256, null=True, blank=True)
     services_offered = models.ManyToManyField(Service, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     is_admin = models.BooleanField(default=False)  # Admin flag for barbers
