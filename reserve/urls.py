@@ -21,4 +21,7 @@ urlpatterns = [
     path('', include(salon_router.urls)),
     path('', include(barber_profile_router.urls)),
     path('', include(customer_profile_router.urls)),
+    path('HomeUp',LandingUPViewSet.as_view(),name='LandingUP'),
+    path('HomeMid',LandingMidViewSet.as_view(),name='LandingMid'),
+    path('HomeDown',LandingDownViewSet.as_view(),name='LandingDown'),
 ]

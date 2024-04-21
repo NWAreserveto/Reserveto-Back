@@ -175,3 +175,17 @@ class SalonSerializer(serializers.ModelSerializer):
         for barber in barbers:
             barber.salons.add(instance)
         return instance
+    
+class LandingUPSerializer(serializers.ModelSerializer):
+    class Meta:
+        model =LandingUP
+        fields = '__all__'
+class LandingMidSerializer(serializers.ModelSerializer):
+    class Meta:
+        model =LandingMid
+        fields = '__all__'
+
+class LandingDownSerializer(serializers.ModelSerializer):
+    class Meta:
+        model =LandingDown
+        fields = '__all__'

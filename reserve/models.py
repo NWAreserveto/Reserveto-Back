@@ -100,6 +100,27 @@ class Gallery(models.Model):
     description = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
+class LandingUP(models.Model):
+    title = models.CharField(max_length=256)
+    description = models.TextField()
+    landing_image = models.ImageField()
+    gif_url =models.URLField()
+
+    def _str_(self):
+        return self.title
+    
+class LandingMid(models.Model):
+    description = models.TextField()
+    landing_image = models.ImageField()
+
+class LandingDown(models.Model):
+
+    description = models.TextField()
+    landing_image = models.ImageField()
+
+
+    
+
 # class User(AbstractUser):
 #     email_verified = models.BooleanField(default=False)
 #     class Meta:
