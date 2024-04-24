@@ -1,6 +1,7 @@
-from rest_framework import status, viewsets, mixins, generics
+from rest_framework import status, viewsets, mixins, generics, filters
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
 from .serializers import LoginSerializer
 from .serializers import *
@@ -147,10 +148,13 @@ class SalonViewSet(BarberAdminMixin, mixins.ListModelMixin,
                    viewsets.GenericViewSet):
     queryset = Salon.objects.all()
     serializer_class = SalonSerializer
-
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['name']
     def get_permissions(self):
         if self.action in ['update', 'partial_update']:
             permission_classes = [IsBarberAdminSalonWithJWTForUpdate]
+        elif self.action in ['list', 'retrieve']:  
+            permission_classes = [AllowAny]
         else:
             permission_classes = [IsBarberAdminSalonWithJWT]
         return [permission() for permission in permission_classes]
@@ -167,10 +171,13 @@ class SalonViewSet(BarberAdminMixin, mixins.ListModelMixin,
 class BarberProfileViewSet(viewsets.ModelViewSet):
     queryset = Barber.objects.all()
     serializer_class = BarberSerializer
-
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['first_name', 'last_name', 'user__username']
     def get_permissions(self):
         if self.action in ['update', 'partial_update', 'destroy']:
             self.permission_classes = [IsBarberOwnerWithJWT]
+        elif self.action in ['list', 'retrieve']:  
+            self.permission_classes = [AllowAny]
         else:
             self.permission_classes = [IsAuthenticated]
         return super(BarberProfileViewSet, self).get_permissions()
