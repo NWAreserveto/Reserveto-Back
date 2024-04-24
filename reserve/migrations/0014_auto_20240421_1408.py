@@ -8,7 +8,7 @@ from pytz import utc
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('reserve', '0012_alter_passwordreset_expires_at'),
+        ('reserve', '0013_alter_passwordreset_expires_at'),
     ]
 
     operations = [

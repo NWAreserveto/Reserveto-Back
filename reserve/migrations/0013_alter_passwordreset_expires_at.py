@@ -2,19 +2,19 @@
 
 import datetime
 from django.db import migrations, models
-from datetime import timezone
+from pytz import utc
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('reserve', '0010_auto_20240421_1349'),
+        ('reserve', '0012_alter_passwordreset_expires_at'),
     ]
 
     operations = [
         migrations.AlterField(
             model_name='passwordreset',
             name='expires_at',
-            field=models.DateTimeField(default=datetime.datetime(2024, 4, 21, 11, 20, 32, 341279, tzinfo=timezone.utc)),
+            field=models.DateTimeField(default=datetime.datetime(2024, 4, 21, 11, 20, 54, 752447, tzinfo=utc)),
         ),
     ]
