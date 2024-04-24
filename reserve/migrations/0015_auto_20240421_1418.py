@@ -2,13 +2,13 @@
 
 import datetime
 from django.db import migrations, models
-from django.utils.timezone import utc
+from pytz import utc
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('reserve', '0013_auto_20240421_1408'),
+        ('reserve', '0014_auto_20240421_1408'),
     ]
 
     operations = [

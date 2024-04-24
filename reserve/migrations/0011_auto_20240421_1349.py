@@ -2,13 +2,13 @@
 
 import datetime
 from django.db import migrations, models
-from django.utils.timezone import utc
+from pytz import utc
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('reserve', '0009_alter_passwordreset_expires_at'),
+        ('reserve', '0010_barber_location_alter_passwordreset_expires_at'),
     ]
 
     operations = [
