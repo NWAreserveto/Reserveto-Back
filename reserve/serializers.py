@@ -200,7 +200,7 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 class ResponseSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Response
+        model = ResponseMessage
         fields = ['id', 'review', 'responder', 'reply', 'image', 'created_at', 'updated_at']
         read_only_fields = ('responder',)
 

@@ -23,9 +23,10 @@ class CanRespondToReview(permissions.BasePermission):
 
     def has_permission(self, request, view):
         if request.user.is_authenticated and hasattr(request.user, 'barber') and request.user.barber.is_admin:
-            review_data = request.data.get('review')  
-            if review_data:
-                salon_id = review_data.get('salon')  
+            review_id = request.data.get('review')  
+            review = Review.objects.get(pk=review_id)
+            if review :
+                salon_id = review.salon_id
                 if salon_id:
                     return request.user.barber.salons.filter(pk=salon_id).exists()
         return False
