@@ -8,7 +8,7 @@ class PasswordReset(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     token = models.UUIDField(default=uuid.uuid4, editable=False)
     created = models.DateTimeField(auto_now_add=True)
-    expires_at = models.DateTimeField(default=timezone.now() + timezone.timedelta(hours=1))
+    expires_at = models.DateTimeField(default=timezone.now() + timezone.timedelta(hours=12))
     class Meta:
         app_label = 'reserve'
 
@@ -72,16 +72,29 @@ class Customer(models.Model):
 
     
 class Review(models.Model):
-    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='reviews')
-    barber = models.ForeignKey(Barber, on_delete=models.CASCADE, related_name='reviews')
+    reviewer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='reviews')
+    recipient_barber = models.ForeignKey(Barber, on_delete=models.CASCADE, related_name='reviews')
     salon = models.ForeignKey(Salon, on_delete=models.CASCADE, related_name='reviews')
     rating = models.PositiveSmallIntegerField()
     comment = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
+    images = models.ImageField(upload_to='review_images', null=True, blank=True)
+    def __str__(self):
+        return f"{self.reviewer.user.username} - {self.recipient_barber.user.username} - {self.rating}"
+    
+
+class Response(models.Model):
+    review = models.OneToOneField(Review, on_delete=models.CASCADE, related_name='response')
+    responder = models.ForeignKey(Barber, on_delete=models.CASCADE)
+    reply = models.TextField()
+    image = models.ImageField(upload_to='reviewreply_images', null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.customer.user.username} - {self.barber.user.username} - {self.rating}"
-    
+        return f"Response by {self.responder.name} on {self.created_at.strftime('%Y-%m-%d')}"
+
+
 class Appointment(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='bookings')
     services = models.ManyToManyField(Service, related_name='appointments')

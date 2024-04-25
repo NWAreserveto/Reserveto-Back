@@ -8,7 +8,6 @@ from .serializers import *
 from django.shortcuts import get_object_or_404
 from .serializers import *
 from .models import PasswordReset
-# from .models import Landing
 import uuid
 from .models import *
 from django.contrib.auth.models import User
@@ -79,11 +78,9 @@ class PasswordResetRequestAPIView(APIView):
         if not user:
             return Response({'خطا': 'کاربری با این ایمیل وجود ندارد'}, status=status.HTTP_400_BAD_REQUEST)
         
-        # Generate token
         token = str(uuid.uuid4())
-        password_reset = PasswordReset.objects.create(user=user, token=token, expires_at=timezone.now() + timezone.timedelta(hours=1))
+        password_reset = PasswordReset.objects.create(user=user, token=token, expires_at=timezone.now() + timezone.timedelta(hours=12))
         
-        # Send email
         send_password_reset_email(user, token)
 
         return Response({'پیغام': 'ایمیل بازیابی رمز عبور با موفقیت ارسال شد'}, status=status.HTTP_200_OK)
@@ -134,14 +131,12 @@ def send_password_reset_email(user, token):
 #     send_mail(subject, message, settings.EMAIL_HOST_USER, [user.email])
 
 
-# Base ViewSets or Mixins
 class BarberAdminMixin:
     permission_classes = [IsBarberAdminSalonWithJWT]
 
 class UserOwnerMixin:
     permission_classes = [IsUserOwnerWithJWT]
 
-# Salon ViewSet
 class SalonViewSet(BarberAdminMixin, mixins.ListModelMixin,
                    mixins.CreateModelMixin, mixins.RetrieveModelMixin,
                    mixins.UpdateModelMixin, mixins.DestroyModelMixin,
@@ -238,9 +233,78 @@ class CustomerProfileViewSet(viewsets.ModelViewSet):
 class LandingUPViewSet(generics.ListAPIView):
     queryset = LandingUP.objects.all()
     serializer_class = LandingUPSerializer
+
 class LandingMidViewSet(generics.ListAPIView):
     queryset = LandingMid.objects.all()
     serializer_class = LandingMidSerializer
+
 class LandingDownViewSet(generics.ListAPIView):
     queryset = LandingDown.objects.all()
     serializer_class = LandingDownSerializer
+
+
+class BarberReviewsAPIView(generics.ListCreateAPIView):
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
+
+
+    def get_permissions(self):
+        if self.request.method == 'POST':
+            return [IsAuthenticated()]
+        return super().get_permissions()
+
+    def get_queryset(self):
+        barber_id = self.kwargs['barber_id']
+        return Review.objects.filter(recipient_barber_id=barber_id)
+
+    def perform_create(self, serializer):
+        barber_id = self.kwargs['barber_id']
+        barber = Barber.objects.get(pk=barber_id)
+        reviewer = self.request.user.customer
+        serializer.save(reviewer=reviewer, recipient_barber=barber)
+
+class SalonReviewsAPIView(generics.ListCreateAPIView):
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
+
+    def get_permissions(self):
+        if self.request.method == 'POST':
+            return [IsAuthenticated()]
+        return []
+
+    def get_queryset(self):
+        salon_id = self.kwargs['salon_id']
+        return Review.objects.filter(salon_id=salon_id)
+
+    def perform_create(self, serializer):
+        serializer.save(customer=self.request.user)
+
+class ReviewDetailAPIView(generics.ListAPIView):
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
+
+
+class ResponseAPIView(generics.ListCreateAPIView):
+    queryset = Response.objects.all()
+    serializer_class = ResponseSerializer
+
+    def get_permissions(self):
+        if self.request.method == 'POST':
+            return [CanRespondToReview()]
+        elif self.request.method == 'GET':
+            return [IsAuthenticated()]
+        return []
+
+    def get_queryset(self):
+        return Response.objects.filter(responder=self.request.user.barber)
+
+class SingleResponseAPIView(generics.RetrieveUpdateAPIView):
+    queryset = Response.objects.all()
+    serializer_class = ResponseSerializer
+
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            return [IsAuthenticated()]
+        elif self.request.method == 'PUT' or self.request.method == 'PATCH':
+            return [CanRespondToReview()]
+        return super().get_permissions()
