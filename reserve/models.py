@@ -83,7 +83,7 @@ class Review(models.Model):
         return f"{self.reviewer.user.username} - {self.recipient_barber.user.username} - {self.rating}"
     
 
-class Response(models.Model):
+class ResponseMessage(models.Model):
     review = models.OneToOneField(Review, on_delete=models.CASCADE, related_name='response')
     responder = models.ForeignKey(Barber, on_delete=models.CASCADE)
     reply = models.TextField()
@@ -92,7 +92,7 @@ class Response(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"Response by {self.responder.name} on {self.created_at.strftime('%Y-%m-%d')}"
+        return f"Response by {self.responder.first_name} {self.responder.last_name} on {self.created_at.strftime('%Y-%m-%d')}"
 
 
 class Appointment(models.Model):

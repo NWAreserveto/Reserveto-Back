@@ -5,7 +5,6 @@ from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
 from .serializers import LoginSerializer
 from .serializers import *
-from django.shortcuts import get_object_or_404
 from .serializers import *
 from .models import PasswordReset
 import uuid
@@ -13,7 +12,6 @@ from .models import *
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.conf import settings
-from django.urls import reverse
 from django.utils import timezone
 from django.contrib.auth import authenticate
 from .permissions import *
@@ -39,7 +37,8 @@ class LoginAPIView(APIView):
                     'refresh': str(refresh),
                     'access': str(refresh.access_token),
                     'role': role
-                })
+                },
+                status=status.HTTP_200_OK)
             else:
                 return Response({'خطا': 'مشخصات نامعتبر است '}, status=status.HTTP_401_UNAUTHORIZED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -285,7 +284,7 @@ class ReviewDetailAPIView(generics.ListAPIView):
 
 
 class ResponseAPIView(generics.ListCreateAPIView):
-    queryset = Response.objects.all()
+    queryset = ResponseMessage.objects.all()
     serializer_class = ResponseSerializer
 
     def get_permissions(self):
@@ -296,10 +295,10 @@ class ResponseAPIView(generics.ListCreateAPIView):
         return []
 
     def get_queryset(self):
-        return Response.objects.filter(responder=self.request.user.barber)
+        return ResponseMessage.objects.filter(responder=self.request.user.barber)
 
 class SingleResponseAPIView(generics.RetrieveUpdateAPIView):
-    queryset = Response.objects.all()
+    queryset = ResponseMessage.objects.all()
     serializer_class = ResponseSerializer
 
     def get_permissions(self):
