@@ -16,6 +16,21 @@ class IsBarberAdminSalonWithJWT(permissions.BasePermission):
         return False
     
 
+class CanRespondToReview(permissions.BasePermission):
+    """
+    Allows access only to salon owners with a valid JWT and are the owner of the salon associated with the review.
+    """
+
+    def has_permission(self, request, view):
+        if request.user.is_authenticated and hasattr(request.user, 'barber') and request.user.barber.is_admin:
+            review_data = request.data.get('review')  
+            if review_data:
+                salon_id = review_data.get('salon')  
+                if salon_id:
+                    return request.user.barber.salons.filter(pk=salon_id).exists()
+        return False
+
+
 class IsBarberAdminSalonWithJWTForUpdate(permissions.BasePermission):
     """
     Allows access only to barber users with a valid JWT and is_admin=True.

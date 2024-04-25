@@ -189,3 +189,21 @@ class LandingDownSerializer(serializers.ModelSerializer):
     class Meta:
         model =LandingDown
         fields = '__all__'
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Review
+        fields = ['id', 'reviewer', 'recipient_barber', 'salon', 'rating', 'comment', 'created_at', 'images', 'response']
+        read_only_fields = ['id', 'created_at']
+
+
+class ResponseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Response
+        fields = ['id', 'review', 'responder', 'reply', 'image', 'created_at', 'updated_at']
+        read_only_fields = ('responder',)
+
+    def create(self, validated_data):
+        validated_data['responder'] = self.context['request'].user.barber
+        return super().create(validated_data)
