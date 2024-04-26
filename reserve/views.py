@@ -31,12 +31,21 @@ class LoginAPIView(APIView):
                 is_customer = Customer.objects.filter(user=user).exists()
                 if is_barber:
                     role = "barber"
+                    tmp = Barber.objects.get(user=user)
+                    obj_serializer = BarberSerializer(tmp)
+                    obj_data = obj_serializer.data
+
                 elif is_customer:
                     role = "customer"
+                    tmp = Customer.objects.get(user=user)
+                    obj_serializer = CustomerSerializer(tmp)
+                    obj_data = obj_serializer.data
+
                 return Response({
                     'refresh': str(refresh),
                     'access': str(refresh.access_token),
-                    'role': role
+                    'role': role,
+                    role.capitalize(): obj_data
                 },
                 status=status.HTTP_200_OK)
             else:
