@@ -128,7 +128,7 @@ def generate_token(user):
 
 def send_password_reset_email(user, token):
     subject = 'Password Reset'
-    message = f'Hello {user.username},\n\nPlease click the link below to reset your password:\n\n{settings.BASE_URL}/password_reset/{token}/'
+    message = f'Hello {user.username},\n\nPlease click the link below to reset your password:\n\n{settings.BASE_URL}/api/password_reset/{token}/'
     send_mail(subject, message, settings.EMAIL_HOST_USER, [user.email],fail_silently=False)
 
 
