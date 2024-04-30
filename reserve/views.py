@@ -97,8 +97,6 @@ class PasswordResetRequestAPIView(APIView):
 class PasswordResetAPIView(APIView):
     def post(self, request, token):
         password_reset = PasswordReset.objects.filter(token=token, expires_at__gte=timezone.now()).first()
-        if not password_reset:
-            return Response({'خطا': ' توکن نامعتبر یا منقضی شده است'}, status=status.HTTP_400_BAD_REQUEST)
 
         serializer = PasswordResetSerializer(data=request.data)
         if serializer.is_valid():
@@ -111,6 +109,13 @@ class PasswordResetAPIView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
 
+class TokenValidation(APIView):
+    def post(self,request) :
+        token = request.data.get('token')
+        password_reset = PasswordReset.objects.filter(token=token, expires_at__gte=timezone.now()).first()
+        if not password_reset:
+            return Response({'خطا': ' توکن نامعتبر یا منقضی شده است'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'پیغام': ' توکن معتبر است'}, status=status.HTTP_202_ACCEPTED)
 # class EmailVerificationAPIView(APIView):
 #     def get(self, request, user_id):
 #         user = get_object_or_404(User, id=user_id)
@@ -128,7 +133,7 @@ def generate_token(user):
 
 def send_password_reset_email(user, token):
     subject = 'Password Reset'
-    message = f'Hello {user.username},\n\nPlease click the link below to reset your password:\n\n{settings.BASE_URL}/api/password_reset/{token}/'
+    message = f'Hello {user.username},\n\nPlease click the link below to reset your password:\n\n{settings.BASE_URL}/password_reset/{token}/'
     send_mail(subject, message, settings.EMAIL_HOST_USER, [user.email],fail_silently=False)
 
 
