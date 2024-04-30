@@ -18,6 +18,7 @@ urlpatterns = [
     path('BarberSignup/', BarberSignupAPIView.as_view(), name='BarberSignup'),
     path('password_reset_request/', PasswordResetRequestAPIView.as_view(), name='password_reset_request'),
     path('password_reset/<str:token>/', PasswordResetAPIView.as_view(), name='password_reset'),
+    path('token_validation/', TokenValidation.as_view(), name='token_validation'),
     path('', include(salon_router.urls)),
     path('', include(barber_profile_router.urls)),
     path('', include(customer_profile_router.urls)),

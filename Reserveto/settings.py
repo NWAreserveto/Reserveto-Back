@@ -157,7 +157,7 @@ USE_L10N = True
 
 USE_TZ = True
 
-BASE_URL = "https://reserveto-back.onrender.com"
+BASE_URL = "localhost:3000"
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'

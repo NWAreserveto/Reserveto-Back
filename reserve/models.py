@@ -13,7 +13,7 @@ class PasswordReset(models.Model):
         app_label = 'reserve'
 
     def __str__(self):
-        return f"Username :{self.user.username} + Created at : {self.created} + Expires at : {self.expires_at}"
+        return f"Username :{self.user.username} + Created at : {self.created} + Expires at : {self.expires_at}  + Token : {self.token}"
 
 
 class Service(models.Model):
