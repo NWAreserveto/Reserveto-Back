@@ -37,15 +37,35 @@ class Salon(models.Model):
     def __str__(self):
         return self.name
 
+class WorkTimeModelForBarber(models.Model):
+    BARBER_WEEKDAYS = [
+        (0, 'Monday'),
+        (1, 'Tuesday'),
+        (2, 'Wednesday'),
+        (3, 'Thursday'),
+        (4, 'Friday'),
+        (5, 'Saturday'),
+        (6, 'Sunday'),
+    ]
+
+    barber = models.ForeignKey('Barber', on_delete=models.CASCADE, related_name='work_times')
+    day_of_week = models.IntegerField(choices=BARBER_WEEKDAYS)
+    work_start_time = models.TimeField()
+    work_end_time = models.TimeField()
+
+    class Meta:
+        unique_together = ['barber', 'day_of_week']
+
 class Barber(models.Model):
     first_name = models.CharField(max_length = 256)
     last_name = models.CharField(max_length = 256)
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     phone_number = models.CharField(max_length=20)
-    salons = models.ManyToManyField(Salon, related_name='barbers', null=True, blank=True)  
+    salons = models.ManyToManyField(Salon, related_name='barbers',blank=True)  
     experience_years = models.IntegerField()
     location = models.TextField(max_length=256, null=True, blank=True)
-    services_offered = models.ManyToManyField(Service, null=True, blank=True)
+    services_offered = models.ManyToManyField(Service, blank=True)
+    WorkTimeForEachBarber = models.ForeignKey('WorkTimeModelForBarber',on_delete=models.CASCADE,related_name='barbers',null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     is_admin = models.BooleanField(default=False)  # Admin flag for barbers
     bio = models.TextField(blank=True, null=True)
@@ -94,17 +114,28 @@ class Response(models.Model):
     def __str__(self):
         return f"Response by {self.responder.name} on {self.created_at.strftime('%Y-%m-%d')}"
 
+class TimeSlot(models.Model):
+    time = models.DateTimeField()
+
+class Reservation(models.Model):
+    customer = models.ForeignKey('Customer', on_delete=models.CASCADE)
+    timeslot = models.ForeignKey('TimeSlot', on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_confirmed = models.BooleanField()
 
 class Appointment(models.Model):
-    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='bookings')
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='appointments')
     services = models.ManyToManyField(Service, related_name='appointments')
-    barber = models.ForeignKey(Barber, on_delete=models.CASCADE, related_name='bookings')
+    barber = models.ForeignKey(Barber, on_delete=models.CASCADE, related_name='appointments')
+    salon = models.ForeignKey(Salon, on_delete=models.CASCADE)
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
     created_at = models.DateTimeField(auto_now_add=True)
+    reservations = models.ManyToManyField(Reservation, related_name='appointments', blank=True)
+    
 
     def __str__(self):
-        return f"{self.customer.username} - {', '.join([service.name for service in self.services.all()])} - {self.barber.user.username} - {self.start_time}"    
+        return f"{self.customer.username} - {', '.join([service.name for service in self.services.all()])} - {self.barber.user.username} - {self.start_time}"
 
 class Gallery(models.Model):
     barber = models.ForeignKey(Barber, on_delete=models.CASCADE, related_name='gallery_images', null=True, blank=True)

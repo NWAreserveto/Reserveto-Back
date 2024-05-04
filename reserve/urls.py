@@ -29,4 +29,7 @@ urlpatterns = [
     path('reviews/', ReviewDetailAPIView.as_view(), name = 'all-review-detail'),
     path('reviews/responses/', ResponseAPIView.as_view(), name = 'response-list'),
     path('reviews/responses/<int:pk>/', SingleResponseAPIView.as_view(), name = 'response-detail'),
+    # path('available-times/<int:pk>/', AvailableTimes.as_view(), name='available-times'),
+  
+
 ]

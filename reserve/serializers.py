@@ -131,8 +131,6 @@ class CustomerSignupSerializer(serializers.ModelSerializer):
             user = user_serializer.save()
             customer = Customer.objects.create(user=user, **validated_data)
             return customer
-    
-
 
 class CustomerSerializer(serializers.ModelSerializer):
     user = UserSerializer()
@@ -207,3 +205,26 @@ class ResponseSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         validated_data['responder'] = self.context['request'].user.barber
         return super().create(validated_data)
+
+
+class AppointmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Appointment
+        fields = ['id', 'customer', 'services', 'barber', 'salon', 'start_time', 'end_time', 'created_at']
+
+
+class ReservationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Reservation
+        fields = ['id', 'customer', 'timeslot', 'created_at','is_confirmed']
+
+class TimeSlotSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TimeSlot
+        fields = '__all__'
+class AvalibaleTimesSerializer(serializers.Serializer):
+    start_work = serializers.DateTimeField(source='barber.worktimemodelforbarber.work_start_time')
+    end_work = serializers.DateTimeField(source='barber.worktimemodelforbarber.work_end_time')
+    class Meta:
+        model = Appointment
+        fields = ['start_work','end_work','start_time','end_time']

@@ -1,3 +1,4 @@
+import datetime
 from rest_framework import status, viewsets, mixins, generics, filters
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -10,12 +11,14 @@ from .serializers import *
 from .models import PasswordReset
 import uuid
 from .models import *
+from django.http import HttpResponse , request
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.conf import settings
 from django.urls import reverse
 from django.utils import timezone
 from django.contrib.auth import authenticate
+from django.db.models import Q, F ,Func
 from .permissions import *
 from rest_framework.permissions import IsAuthenticated
 
@@ -308,3 +311,16 @@ class SingleResponseAPIView(generics.RetrieveUpdateAPIView):
         elif self.request.method == 'PUT' or self.request.method == 'PATCH':
             return [CanRespondToReview()]
         return super().get_permissions()
+    
+class AvailableTimes(generics.RetrieveUpdateAPIView):
+    queryset = Appointment.objects.all()
+    lookup_field = 'pk'  # Specify the lookup field
+
+    def get_times(self, id):
+        if self.request.method == 'GET':
+            try:
+                queryset = Appointment.objects.filter(pk=id).values('start_time', 'end_time')
+                return HttpResponse(queryset)
+            except Appointment.DoesNotExist:
+                return HttpResponse(status=404)
+
