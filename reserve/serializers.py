@@ -213,18 +213,7 @@ class AppointmentSerializer(serializers.ModelSerializer):
         fields = ['id', 'customer', 'services', 'barber', 'salon', 'start_time', 'end_time', 'created_at']
 
 
-class ReservationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Reservation
-        fields = ['id', 'customer', 'timeslot', 'created_at','is_confirmed']
-
-class TimeSlotSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = TimeSlot
-        fields = '__all__'
-class AvalibaleTimesSerializer(serializers.Serializer):
-    start_work = serializers.DateTimeField(source='barber.worktimemodelforbarber.work_start_time')
-    end_work = serializers.DateTimeField(source='barber.worktimemodelforbarber.work_end_time')
-    class Meta:
-        model = Appointment
-        fields = ['start_work','end_work','start_time','end_time']
+class BlockedTimesOfBarberSerializer(serializers.ModelSerializer):
+    date =  serializers.DateField()
+    start_time = serializers.TimeField()
+    end_time = serializers.TimeField()

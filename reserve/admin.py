@@ -13,4 +13,5 @@ admin.site.register(LandingUP)
 admin.site.register(LandingMid)
 admin.site.register(LandingDown)
 admin.site.register(Response)
+admin.site.register(BlockedTimesOfBarber)
 

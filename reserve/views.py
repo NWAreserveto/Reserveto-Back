@@ -312,15 +312,28 @@ class SingleResponseAPIView(generics.RetrieveUpdateAPIView):
             return [CanRespondToReview()]
         return super().get_permissions()
     
-class AvailableTimes(generics.RetrieveUpdateAPIView):
-    queryset = Appointment.objects.all()
-    lookup_field = 'pk'  # Specify the lookup field
+class BlockedAndAppointmentTimes(generics.RetrieveUpdateAPIView):
 
-    def get_times(self, id):
-        if self.request.method == 'GET':
-            try:
-                queryset = Appointment.objects.filter(pk=id).values('start_time', 'end_time')
-                return HttpResponse(queryset)
-            except Appointment.DoesNotExist:
-                return HttpResponse(status=404)
+    def get_queryset_blocked_times(self, barber_id, day):
+        return BlockedTimesOfBarber.objects.filter(barber_id=barber_id, date=day)
+
+    def get_queryset_appointment_times(self, barber_id, day):
+        return Appointment.objects.filter(barber_id=barber_id, start_time__date=day)
+
+    def get(self, request, *args, **kwargs):
+        barber_id = self.kwargs.get('barber_id')
+        day = self.kwargs.get('day')
+
+        queryset_blocked_times = self.get_queryset_blocked_times(barber_id, day)
+        queryset_appointment_times = self.get_queryset_appointment_times(barber_id, day)
+
+        blocked_times_data = BlockedTimesOfBarberSerializer(queryset_blocked_times, many=True).data
+        appointment_times_data = AppointmentSerializer(queryset_appointment_times, many=True).data
+
+        response_data = {
+            'blocked_times': blocked_times_data,
+            'appointment_times': appointment_times_data
+        }
+
+        return Response(response_data)
 
