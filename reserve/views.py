@@ -256,6 +256,10 @@ class LandingDownViewSet(generics.ListAPIView):
     serializer_class = LandingDownSerializer
 
 
+class LandingGifsViewSet(generics.ListAPIView):
+    queryset = LandingGifs.objects.all()
+    serializer_class = LandingGifsSerializer
+
 class BarberReviewsAPIView(generics.ListCreateAPIView):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer

@@ -113,12 +113,18 @@ class Gallery(models.Model):
     description = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
-class LandingUP(models.Model):
-    title = models.CharField(max_length=256)
-    description = models.TextField()
-    landing_image = models.ImageField()
-    gif_url =models.URLField()
+class LandingGifs(models.Model):
+    gif_name = models.CharField(max_length=255)
+    gif_json =models.TextField()
 
+
+class LandingUP(models.Model):
+    hero_section_title = models.CharField(max_length=256)
+    hero_section_description = models.TextField()
+    hero_section_image1 = models.ImageField(null=True)
+    hero_section_image2 = models.ImageField(null=True)
+
+    
     def _str_(self):
         return self.title
     
