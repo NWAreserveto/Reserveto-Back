@@ -25,6 +25,7 @@ urlpatterns = [
     path('HomeUp',LandingUPViewSet.as_view(),name='LandingUP'),
     path('HomeMid',LandingMidViewSet.as_view(),name='LandingMid'),
     path('HomeDown',LandingDownViewSet.as_view(),name='LandingDown'),
+    path('LandingGifs',LandingGifsViewSet.as_view(),name='LandingGifs'),
     path('barbers/<int:barber_id>/reviews/', BarberReviewsAPIView.as_view(), name='barber-reviews'),
     path('salons/<int:salon_id>/reviews/', SalonReviewsAPIView.as_view(), name='salon-reviews'),
     path('reviews/', ReviewDetailAPIView.as_view(), name = 'all-review-detail'),

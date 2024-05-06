@@ -190,6 +190,11 @@ class LandingDownSerializer(serializers.ModelSerializer):
         model =LandingDown
         fields = '__all__'
 
+    
+class LandingGifsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model =LandingGifs
+        fields = '__all__'
 
 class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
