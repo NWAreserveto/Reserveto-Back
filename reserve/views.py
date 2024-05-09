@@ -52,6 +52,19 @@ class LoginAPIView(APIView):
                 return Response({'خطا': 'مشخصات نامعتبر است '}, status=status.HTTP_401_UNAUTHORIZED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
+
+
+class LogoutAPIView(APIView):
+    def post(self, request):
+        permission_classes = [IsAuthenticated]
+        try:
+            refresh_token = request.data['refresh']
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+            return Response({'پیغام': 'خروج موفقیت آمیز'}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'خطا': 'خروج ناموفق'}, status=status.HTTP_400_BAD_REQUEST)
+    
 class BarberSignupAPIView(APIView):
     def post(self, request):
         serializer = BarberSignupSerializer(data=request.data)
@@ -116,14 +129,7 @@ class TokenValidation(APIView):
         if not password_reset:
             return Response({'خطا': ' توکن نامعتبر یا منقضی شده است'}, status=status.HTTP_400_BAD_REQUEST)
         return Response({'پیغام': ' توکن معتبر است'}, status=status.HTTP_202_ACCEPTED)
-# class EmailVerificationAPIView(APIView):
-#     def get(self, request, user_id):
-#         user = get_object_or_404(User, id=user_id)
-#         if not user.email_verified:
-#             user.email_verified = True
-#             user.save()
-#             return Response({'detail': 'Email verified successfully.'}, status=status.HTTP_200_OK)
-#         return Response({'detail': 'Email is already verified.'}, status=status.HTTP_400_BAD_REQUEST)
+
 
 def generate_token(user):
     token = uuid.uuid4()
@@ -136,12 +142,6 @@ def send_password_reset_email(user, token):
     message = f'Hello {user.username},\n\nPlease click the link below to reset your password:\n\n{settings.BASE_URL}/password_reset/{token}/'
     send_mail(subject, message, settings.EMAIL_HOST_USER, [user.email],fail_silently=False)
 
-
-
-# def send_verification_email(user):
-#     subject = 'Email Verification'
-#     message = f'Hello {user.username},\n\nPlease click the link below to verify your email:\n\n{settings.BASE_URL}/verify-email/{user.id}'
-#     send_mail(subject, message, settings.EMAIL_HOST_USER, [user.email])
 
 
 class BarberAdminMixin:
