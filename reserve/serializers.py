@@ -156,6 +156,12 @@ class SalonSerializer(serializers.ModelSerializer):
         model = Salon
         fields = ['id', 'name', 'address', 'phone_number', 'barber']
 
+
+    def validate_name(self, value):
+        if Salon.objects.filter(name=value).exists():
+            raise serializers.ValidationError("A salon with that name already exists.")
+        return value
+
     def create(self, validated_data):
         barbers = validated_data.pop('barber')
         salon = Salon.objects.create(**validated_data)
