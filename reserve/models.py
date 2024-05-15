@@ -33,7 +33,6 @@ class Salon(models.Model):
     phone_number = models.CharField(max_length=15)
     profile_picture = models.ImageField(upload_to='salon_profiles/', blank=True, null=True)
 
-
     def __str__(self):
         return self.name
 
@@ -137,10 +136,34 @@ class LandingDown(models.Model):
     description = models.TextField()
     landing_image = models.ImageField()
 
-
     
 
-# class User(AbstractUser):
-#     email_verified = models.BooleanField(default=False)
-#     class Meta:
-#         app_label = 'reserve'
+class Chat(models.Model):
+    title = models.CharField(max_length=255)
+    user = models.ForeignKey(User,on_delete=models.CASCADE, related_name='chats')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self) -> str:
+        return self.title
+
+
+class Message(models.Model):
+    chat = models.ForeignKey(Chat, on_delete=models.CASCADE, related_name='messages')
+    text = models.TextField(blank=False, null=False)
+    reply = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)     
+
+
+class GPTCall(models.Model):
+    message = models.ForeignKey(Message, on_delete=models.CASCADE, related_name='gptcalls')
+    prompt = models.TextField()
+    system = models.TextField(blank=True,null=True)
+    response = models.TextField()
+    tokens=models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    def __str__(self) -> str:
+         return f"{self.prompt[:20]}{self.response[:20]} Total Tokens: {self.tokens}"
+ 
