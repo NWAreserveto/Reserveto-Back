@@ -23,12 +23,14 @@ class CanRespondToReview(permissions.BasePermission):
 
     def has_permission(self, request, view):
         if request.user.is_authenticated and hasattr(request.user, 'barber') and request.user.barber.is_admin:
-            review_id = request.data.get('review')  
-            review = Review.objects.get(pk=review_id)
-            if review :
-                salon_id = review.salon_id
-                if salon_id:
-                    return request.user.barber.salons.filter(pk=salon_id).exists()
+            print(request.data)
+            review_id = view.kwargs.get('review_id')  # Assuming the review ID is passed in the request data
+            if review_id:
+                try:
+                    review = Review.objects.get(pk=review_id)
+                    return True
+                except Review.DoesNotExist:
+                    return False  # Review does not exist, permission denied
         return False
 
 
@@ -38,17 +40,28 @@ class IsBarberAdminSalonWithJWTForUpdate(permissions.BasePermission):
     """
 
     def has_permission(self, request, view):
-        if request.user.is_authenticated and hasattr(request.user, 'barber') and request.user.barber.is_admin:
-            salon_id = view.kwargs.get('pk')
-            if salon_id:
-                salon = Salon.objects.get(pk=salon_id)
-                if request.user.barber.salons.filter(pk=salon_id).exists():
-                    # The barber admin is already associated with the salon
-                    return True
-                elif 'barber' in request.data and request.user.barber.id in request.data['barber']:
-                    # The barber admin is trying to add themselves to the salon
-                    return True
-            return False
+        print("Checking permissions...")
+        if request.user.is_authenticated and hasattr(request.user, 'barber') and request.user.barber:
+            print("User is authenticated and has a Barber instance.")
+            if request.user.barber.is_admin:
+                print("User is an admin.")
+                salon_id = view.kwargs.get('pk')
+                if salon_id:
+                    print("Salon ID:", salon_id)
+                    try:
+                        salon = Salon.objects.get(pk=salon_id)
+                    except Salon.DoesNotExist:
+                        print("Salon does not exist.")
+                        return False
+                    print("Salon exists.")
+                    print(request.user.barber.salons.id )
+                    print(salon_id)
+                    if request.user.barber.salons and request.user.barber.salons_id == int(salon_id):
+                        print("Barber is associated with the salon.")
+                        return True
+                    else:
+                        print("Barber is not associated with the salon.")
+        print("Permissions denied.")
         return False
     
 class IsUserOwnerWithJWT(permissions.BasePermission):

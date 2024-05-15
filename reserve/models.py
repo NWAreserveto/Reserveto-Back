@@ -32,6 +32,7 @@ class Salon(models.Model):
     address = models.CharField(max_length=255)
     phone_number = models.CharField(max_length=15)
     profile_picture = models.ImageField(upload_to='salon_profiles/', blank=True, null=True)
+    barber = models.ManyToManyField('Barber', null=True, blank=True)  
 
     def __str__(self):
         return self.name
@@ -41,7 +42,7 @@ class Barber(models.Model):
     last_name = models.CharField(max_length = 256)
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     phone_number = models.CharField(max_length=20)
-    salons = models.ManyToManyField(Salon, related_name='barbers', null=True, blank=True)  
+    salons = models.ForeignKey(Salon, on_delete=models.CASCADE, related_name='barbers', null=True, blank=True)  
     experience_years = models.IntegerField()
     location = models.TextField(max_length=256, null=True, blank=True)
     services_offered = models.ManyToManyField(Service, null=True, blank=True)
@@ -73,7 +74,6 @@ class Customer(models.Model):
 class Review(models.Model):
     reviewer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='reviews')
     recipient_barber = models.ForeignKey(Barber, on_delete=models.CASCADE, related_name='reviews')
-    salon = models.ForeignKey(Salon, on_delete=models.CASCADE, related_name='reviews')
     rating = models.PositiveSmallIntegerField()
     comment = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)

@@ -178,11 +178,21 @@ class SalonViewSet(BarberAdminMixin, mixins.ListModelMixin,
     def get_queryset(self):
         return super().get_queryset()
 
-    def perform_create(self, serializer):
-        serializer.save()
-
     def perform_update(self, serializer):
-        serializer.save()
+        # Save the instance to get the updated data
+        instance = serializer.save()
+
+        # Update the list of barbers associated with the salon
+        barbers_data = self.request.data.get('barber', [])
+        instance.barber.set(barbers_data)
+
+    def perform_partial_update(self, serializer):
+        # Save the instance to get the updated data
+        instance = serializer.save()
+
+        # Update the list of barbers associated with the salon
+        barbers_data = self.request.data.get('barber', [])
+        instance.barber.set(barbers_data)
 
 class BarberProfileViewSet(viewsets.ModelViewSet):
     queryset = Barber.objects.all()
@@ -321,7 +331,14 @@ class ResponseAPIView(generics.ListCreateAPIView):
         return []
 
     def get_queryset(self):
-        return ResponseMessage.objects.filter(responder=self.request.user.barber)
+        review_id = self.kwargs.get('review_id')
+        return ResponseMessage.objects.filter(review_id=review_id, responder=self.request.user.barber)
+
+    def perform_create(self, serializer):
+        review_id = self.kwargs.get('review_id')
+        review = Review.objects.get(pk=review_id)
+        serializer.save(review=review, responder=self.request.user.barber)
+
 
 class SingleResponseAPIView(generics.RetrieveUpdateAPIView):
     queryset = ResponseMessage.objects.all()
