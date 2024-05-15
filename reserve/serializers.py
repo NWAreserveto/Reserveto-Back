@@ -150,11 +150,10 @@ class PasswordResetSerializer(serializers.Serializer):
         return data
 
 class SalonSerializer(serializers.ModelSerializer):
-    barber = serializers.PrimaryKeyRelatedField(queryset=Barber.objects.all(), write_only=True, many=True)
-
+    barbers = BarberSerializer(many=True, read_only=True)
     class Meta:
         model = Salon
-        fields = ['id', 'name', 'address', 'phone_number', 'barber']
+        fields = ['id', 'name', 'address', 'phone_number', 'barbers']
 
 
     def validate_name(self, value):
@@ -163,23 +162,30 @@ class SalonSerializer(serializers.ModelSerializer):
         return value
 
     def create(self, validated_data):
-        barbers = validated_data.pop('barber')
+        barbers_data = validated_data.pop('barber', [])
         salon = Salon.objects.create(**validated_data)
-        for barber in barbers:
-            barber.salons.add(salon)
+        for barber in barbers_data:
+            barber.salon = salon
+            barber.save()
         return salon
-    
+
     def update(self, instance, validated_data):
-        barbers = validated_data.pop('barber')
+        barbers_data = validated_data.pop('barbers', [])
+        
         instance.name = validated_data.get('name', instance.name)
         instance.address = validated_data.get('address', instance.address)
         instance.phone_number = validated_data.get('phone_number', instance.phone_number)
+        instance.profile_picture = validated_data.get('profile_picture', instance.profile_picture)
         instance.save()
 
-        # Clear the existing barbers and add the new ones
-        instance.barbers.clear()
-        for barber in barbers:
-            barber.salons.add(instance)
+        for barber in instance.barbers.all():
+            barber.salon = None
+            barber.save()
+        
+        for barber in barbers_data:
+            barber.salon = instance
+            barber.save()
+
         return instance
     
 class LandingUPSerializer(serializers.ModelSerializer):
@@ -205,15 +211,15 @@ class LandingGifsSerializer(serializers.ModelSerializer):
 class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review
-        fields = ['id', 'reviewer', 'recipient_barber', 'salon', 'rating', 'comment', 'created_at', 'images', 'response']
-        read_only_fields = ['id', 'created_at']
+        fields = ['id', 'reviewer', 'recipient_barber', 'rating', 'comment', 'created_at', 'images']
+        read_only_fields = ['id', 'created_at','reviewer', 'recipient_barber']
 
 
 class ResponseSerializer(serializers.ModelSerializer):
     class Meta:
         model = ResponseMessage
         fields = ['id', 'review', 'responder', 'reply', 'image', 'created_at', 'updated_at']
-        read_only_fields = ('responder',)
+        read_only_fields = ('review', 'responder', 'created_at', 'updated_at')
 
     def create(self, validated_data):
         validated_data['responder'] = self.context['request'].user.barber

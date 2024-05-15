@@ -38,7 +38,7 @@ urlpatterns = [
     path('barbers/<int:barber_id>/reviews/', BarberReviewsAPIView.as_view(), name='barber-reviews'),
     path('salons/<int:salon_id>/reviews/', SalonReviewsAPIView.as_view(), name='salon-reviews'),
     path('reviews/', ReviewDetailAPIView.as_view(), name = 'all-review-detail'),
-    path('reviews/responses/', ResponseAPIView.as_view(), name = 'response-list'),
+    path('reviews/<int:review_id>/responses/', ResponseAPIView.as_view(), name='response-list-create'),
     path('reviews/responses/<int:pk>/', SingleResponseAPIView.as_view(), name = 'response-detail'),
     path('chats/', include(router_chat.urls)),
     path('chats/<int:chat_id>/messages/', include(router_message.urls)),
