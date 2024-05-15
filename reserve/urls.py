@@ -1,8 +1,16 @@
 from django.urls import path, include
 from rest_framework.routers import SimpleRouter
+from rest_framework import routers
+
 from .views import *
 
 
+router_chat = SimpleRouter()
+router_chat.register(r'', ChatViewset, basename='Chat')
+
+
+router_message = SimpleRouter()
+router_message.register(r'', MessageViewset, basename='Message')
 
 salon_router = SimpleRouter()
 salon_router.register(r'salons', SalonViewSet,  basename='salons')
@@ -32,4 +40,6 @@ urlpatterns = [
     path('reviews/', ReviewDetailAPIView.as_view(), name = 'all-review-detail'),
     path('reviews/responses/', ResponseAPIView.as_view(), name = 'response-list'),
     path('reviews/responses/<int:pk>/', SingleResponseAPIView.as_view(), name = 'response-detail'),
+    path('chats/', include(router_chat.urls)),
+    path('chats/<int:chat_id>/messages/', include(router_message.urls)),
 ]

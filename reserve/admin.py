@@ -14,4 +14,7 @@ admin.site.register(LandingMid)
 admin.site.register(LandingDown)
 admin.site.register(LandingGifs)
 admin.site.register(ResponseMessage)
+admin.site.register(Chat)
+admin.site.register(Message)
+admin.site.register(GPTCall)
 

@@ -1,13 +1,20 @@
 from rest_framework import status, viewsets, mixins, generics, filters
+from rest_framework.viewsets import GenericViewSet
+from rest_framework.mixins import DestroyModelMixin, UpdateModelMixin
 from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
 from .serializers import LoginSerializer
 from .serializers import *
 from .serializers import *
+from collections import defaultdict
 from .models import PasswordReset
 import uuid
+import os
+from .tasks import reply_chat
 from .models import *
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
@@ -16,6 +23,7 @@ from django.utils import timezone
 from django.contrib.auth import authenticate
 from .permissions import *
 from rest_framework.permissions import IsAuthenticated
+import openai
 
 
 class LoginAPIView(APIView):
@@ -325,3 +333,77 @@ class SingleResponseAPIView(generics.RetrieveUpdateAPIView):
         elif self.request.method == 'PUT' or self.request.method == 'PATCH':
             return [CanRespondToReview()]
         return super().get_permissions()
+    
+
+
+
+
+class ChatViewset(DestroyModelMixin, UpdateModelMixin, GenericViewSet):
+
+    def get_queryset(self):
+        return Chat.objects.filter(user=self.request.user).order_by('-updated_at')
+
+    def get_serializer_class(self):
+        return ChatSerializer
+
+    def format_queryset(self, queryset):
+        dates = defaultdict(list)
+        for chat in queryset:
+            date = str(chat.created_at.date())
+            dates[date].append({
+                'id': chat.id,
+                'title': chat.title
+            })
+        return [{'date': key, 'chats': value} for key, value in dates.items()]
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        return Response(self.format_queryset(queryset=queryset))
+
+    def create(self, request, *args, **kwargs):
+        serializer = SendMessageSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        title = serializer.validated_data['text'][:20]
+        chat = Chat.objects.create(user=request.user, title=title)
+        text = serializer.validated_data['text']
+        message = Message.objects.create(chat=chat, text=text)
+        reply = reply_chat(chat.id, text)
+        message.reply=reply
+        message.save()
+        return Response({
+            'chat_id': chat.id,
+            'reply': reply,
+            'message_id': message.id,
+        })
+    def delete(self, request, *args, **kwargs):
+        self.get_queryset().delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+
+class MessageViewset(mixins.ListModelMixin, GenericViewSet):
+    serializer_class = MessageSerializer
+
+    def get_chat(self):
+        chat_id = self.kwargs['chat_id']
+        chat = get_object_or_404(Chat, id=chat_id)
+        if chat.user != self.request.user:
+            raise PermissionDenied()
+        return chat
+
+    def get_queryset(self):
+        return self.get_chat().messages.all().order_by('-created_at')
+
+    def create(self, request, *args, **kwargs):
+        chat = self.get_chat()
+        serializer = SendMessageSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        text = serializer.validated_data['text']
+        mes = Message.objects.create(chat=chat, text=text)
+        mes.reply = reply_chat(chat.id, text)
+        mes.save()
+
+        return Response({
+            'message_id':mes.id,
+            'reply': mes.reply,
+        })

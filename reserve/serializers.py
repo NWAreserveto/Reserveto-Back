@@ -218,3 +218,18 @@ class ResponseSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         validated_data['responder'] = self.context['request'].user.barber
         return super().create(validated_data)
+    
+
+class ChatSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Chat
+        fields = ['id', 'title', 'created_at']
+        
+class MessageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Message
+        fields = ['id', 'text', 'reply', 'created_at']
+
+        
+class SendMessageSerializer(serializers.Serializer):
+    text = serializers.CharField()
