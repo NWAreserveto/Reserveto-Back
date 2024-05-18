@@ -14,7 +14,7 @@ from collections import defaultdict
 from .models import PasswordReset
 import uuid
 import os
-from .tasks import reply_chat
+# from .tasks import reply_chat
 from .models import *
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
@@ -23,7 +23,7 @@ from django.utils import timezone
 from django.contrib.auth import authenticate
 from .permissions import *
 from rest_framework.permissions import IsAuthenticated
-import openai
+# import openai
 
 
 class LoginAPIView(APIView):
@@ -424,3 +424,41 @@ class MessageViewset(mixins.ListModelMixin, GenericViewSet):
             'message_id':mes.id,
             'reply': mes.reply,
         })
+
+class BlockedAndAppointmentTimes(generics.ListAPIView):
+    queryset =BlockedTimesOfBarber.objects.all()
+    serializer_class = AppointmentSerializer
+    
+    def get_queryset_blocked_times(self, barber_id, day):
+        return BlockedTimesOfBarber.objects.filter(barber_id=barber_id, day=day)
+
+    def get_queryset_appointment_times(self, barber_id, day):
+        return Appointment.objects.filter(barber_id=barber_id, day=day)
+
+    def get(self, request, *args, **kwargs):
+        barber_id = self.kwargs.get('barber_id')
+        day = self.kwargs.get('day')
+
+        queryset_blocked_times = self.get_queryset_blocked_times(barber_id, day)
+        queryset_appointment_times = self.get_queryset_appointment_times(barber_id, day)
+
+        blocked_times_data = BlockedTimesOfBarberSerializer(queryset_blocked_times, many=True).data
+        appointment_times_data = Appointment_Serializer(queryset_appointment_times, many=True).data
+
+        response_data = {
+            'blocked_times': blocked_times_data,
+            'appointment_times': appointment_times_data
+        }
+
+        return Response(response_data)
+from rest_framework.decorators import api_view
+
+class AppointmentCreateAPIView(generics.CreateAPIView):
+    queryset = Appointment.objects.all()
+    serializer_class = AppointmentSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)

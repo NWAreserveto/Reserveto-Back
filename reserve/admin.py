@@ -17,4 +17,5 @@ admin.site.register(ResponseMessage)
 admin.site.register(Chat)
 admin.site.register(Message)
 admin.site.register(GPTCall)
+admin.site.register(BlockedTimesOfBarber)
 

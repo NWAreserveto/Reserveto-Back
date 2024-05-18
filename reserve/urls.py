@@ -3,6 +3,7 @@ from rest_framework.routers import SimpleRouter
 from rest_framework import routers
 
 from .views import *
+from . import views
 
 
 router_chat = SimpleRouter()
@@ -42,4 +43,7 @@ urlpatterns = [
     path('reviews/responses/<int:pk>/', SingleResponseAPIView.as_view(), name = 'response-detail'),
     path('chats/', include(router_chat.urls)),
     path('chats/<int:chat_id>/messages/', include(router_message.urls)),
+    path('reserve/<int:barber_id>/day/<str:day>/', BlockedAndAppointmentTimes.as_view(), name='blocked_and_appointment_times'),
+    path('appointments/', AppointmentCreateAPIView.as_view(), name='appointment-create'),
+    path('lll/',views.get_all),
 ]
