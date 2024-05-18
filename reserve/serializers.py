@@ -239,3 +239,18 @@ class MessageSerializer(serializers.ModelSerializer):
         
 class SendMessageSerializer(serializers.Serializer):
     text = serializers.CharField()
+
+class BlockedTimesOfBarberSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BlockedTimesOfBarber
+        fields = ['start_time','end_time']
+
+class AppointmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Appointment
+        fields = ['id', 'customer', 'services', 'barber', 'day','start_time', 'end_time', 'created_at']
+
+class Appointment_Serializer(serializers.ModelSerializer):
+     class Meta:
+        model = Appointment
+        fields = ['start_time', 'end_time']

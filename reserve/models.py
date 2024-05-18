@@ -32,7 +32,7 @@ class Salon(models.Model):
     address = models.CharField(max_length=255)
     phone_number = models.CharField(max_length=15)
     profile_picture = models.ImageField(upload_to='salon_profiles/', blank=True, null=True)
-    barber = models.ManyToManyField('Barber', null=True, blank=True)  
+    barber = models.ManyToManyField('Barber', null=True, blank=True , related_name='salon')  
 
     def __str__(self):
         return self.name
@@ -45,13 +45,18 @@ class Barber(models.Model):
     salons = models.ForeignKey(Salon, on_delete=models.CASCADE, related_name='barbers', null=True, blank=True)  
     experience_years = models.IntegerField()
     location = models.TextField(max_length=256, null=True, blank=True)
-    services_offered = models.ManyToManyField(Service, null=True, blank=True)
+    services_offered = models.ManyToManyField(Service, null=True, blank=True, related_name='services')
     created_at = models.DateTimeField(auto_now_add=True)
-    is_admin = models.BooleanField(default=False)  # Admin flag for barbers
+    is_admin = models.BooleanField(default=False)  
     bio = models.TextField(blank=True, null=True)
     profile_picture = models.ImageField(upload_to='barber_profiles/', blank=True, null=True)
     def __str__(self):
         return self.user.username
+class BlockedTimesOfBarber(models.Model):
+    barber = models.ForeignKey('Barber',on_delete=models.CASCADE)
+    day = models.DateField(auto_now=True)
+    start_time = models.TimeField()
+    end_time = models.TimeField()
 
 
 class Customer(models.Model):
@@ -98,12 +103,13 @@ class Appointment(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='bookings')
     services = models.ManyToManyField(Service, related_name='appointments')
     barber = models.ForeignKey(Barber, on_delete=models.CASCADE, related_name='bookings')
+    day = models.DateField(auto_now=True)
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.customer.username} - {', '.join([service.name for service in self.services.all()])} - {self.barber.user.username} - {self.start_time}"    
+        return f"{self.customer.user.username} - {', '.join([service.name for service in self.services.all()])} - {self.barber.user.username} - {self.start_time}"    
 
 class Gallery(models.Model):
     barber = models.ForeignKey(Barber, on_delete=models.CASCADE, related_name='gallery_images', null=True, blank=True)
@@ -166,4 +172,3 @@ class GPTCall(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     def __str__(self) -> str:
          return f"{self.prompt[:20]}{self.response[:20]} Total Tokens: {self.tokens}"
- 
