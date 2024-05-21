@@ -89,12 +89,12 @@ WSGI_APPLICATION = 'Reserveto.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.postgresql',
@@ -106,13 +106,13 @@ DATABASES = {
 #     }
 # }
 
-# import dj_database_url 
-# # Replace the SQLite DATABASES configuration with PostgreSQL:
-# DATABASES = {
-#     'default': dj_database_url.config(
-#                 # Replace this value with your local database's connection string. 
-#                 default='postgres://database_t14q_user:5eJY1UjetomZjjkIyNlNGEPwOO8ai1yC@dpg-co6nmva0si5c73cjg0f0-a.oregon-postgres.render.com/database_t14q', 
-#                 conn_max_age=600    )}
+import dj_database_url 
+# Replace the SQLite DATABASES configuration with PostgreSQL:
+DATABASES = {
+    'default': dj_database_url.config(
+                # Replace this value with your local database's connection string. 
+                default='postgres://database_t14q_user:5eJY1UjetomZjjkIyNlNGEPwOO8ai1yC@dpg-co6nmva0si5c73cjg0f0-a.oregon-postgres.render.com/database_t14q', 
+                conn_max_age=600    )}
 
 
 
