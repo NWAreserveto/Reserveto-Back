@@ -14,7 +14,7 @@ from collections import defaultdict
 from .models import PasswordReset
 import uuid
 import os
-# from .tasks import reply_chat
+from .tasks import reply_chat
 from .models import *
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
