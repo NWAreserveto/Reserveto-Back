@@ -89,22 +89,22 @@ WSGI_APPLICATION = 'Reserveto.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'Reserveto',
-        'USER': 'postgres',
-        'PASSWORD': '1',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'Reserveto',
+#         'USER': 'postgres',
+#         'PASSWORD': '1',
+#         'HOST': 'localhost',
+#         'PORT': '5432',
+#     }
+# }
 
 # import dj_database_url 
 # # Replace the SQLite DATABASES configuration with PostgreSQL:
