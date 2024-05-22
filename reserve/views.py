@@ -332,7 +332,7 @@ class ResponseAPIView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         review_id = self.kwargs.get('review_id')
-        return ResponseMessage.objects.filter(review_id=review_id, responder=self.request.user.barber)
+        return ResponseMessage.objects.filter(review_id=review_id)
 
     def perform_create(self, serializer):
         review_id = self.kwargs.get('review_id')
