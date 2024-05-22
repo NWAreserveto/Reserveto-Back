@@ -42,7 +42,7 @@ class Barber(models.Model):
     last_name = models.CharField(max_length = 256)
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     phone_number = models.CharField(max_length=20)
-    salons = models.ForeignKey(Salon, on_delete=models.CASCADE, related_name='barbers', null=True, blank=True)  
+    salons = models.ForeignKey(Salon, on_delete=models.SET_NULL, related_name='barbers', null=True, blank=True)  
     experience_years = models.IntegerField()
     location = models.TextField(max_length=256, null=True, blank=True)
     services_offered = models.ManyToManyField(Service, null=True, blank=True, related_name='services')
@@ -52,11 +52,7 @@ class Barber(models.Model):
     profile_picture = models.ImageField(upload_to='barber_profiles/', blank=True, null=True)
     def __str__(self):
         return self.user.username
-class BlockedTimesOfBarber(models.Model):
-    barber = models.ForeignKey('Barber',on_delete=models.CASCADE)
-    day = models.DateField(auto_now=True)
-    start_time = models.TimeField()
-    end_time = models.TimeField()
+    
 
 
 class Customer(models.Model):
@@ -110,6 +106,14 @@ class Appointment(models.Model):
 
     def __str__(self):
         return f"{self.customer.user.username} - {', '.join([service.name for service in self.services.all()])} - {self.barber.user.username} - {self.start_time}"    
+
+
+class BlockedTimesOfBarber(models.Model):
+    barber = models.ForeignKey('Barber',on_delete=models.CASCADE)
+    day = models.DateField(auto_now=True)
+    start_time = models.TimeField()
+    end_time = models.TimeField()
+
 
 class Gallery(models.Model):
     barber = models.ForeignKey(Barber, on_delete=models.CASCADE, related_name='gallery_images', null=True, blank=True)

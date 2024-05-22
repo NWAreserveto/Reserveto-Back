@@ -150,7 +150,7 @@ class PasswordResetSerializer(serializers.Serializer):
         return data
 
 class SalonSerializer(serializers.ModelSerializer):
-    barbers = BarberSerializer(many=True, read_only=True)
+    barbers = serializers.PrimaryKeyRelatedField(queryset=Barber.objects.all(), many=True, required=False)
     class Meta:
         model = Salon
         fields = ['id', 'name', 'address', 'phone_number', 'barbers']
@@ -164,28 +164,25 @@ class SalonSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         barbers_data = validated_data.pop('barber', [])
         salon = Salon.objects.create(**validated_data)
-        for barber in barbers_data:
+        for barber_id in barbers_data:
+            barber = Barber.objects.get(id=barber_id)
             barber.salon = salon
             barber.save()
         return salon
 
     def update(self, instance, validated_data):
-        barbers_data = validated_data.pop('barbers', [])
-        
+        barbers_data = self.context['request'].data.get('barbers', [])        
         instance.name = validated_data.get('name', instance.name)
         instance.address = validated_data.get('address', instance.address)
         instance.phone_number = validated_data.get('phone_number', instance.phone_number)
         instance.profile_picture = validated_data.get('profile_picture', instance.profile_picture)
         instance.save()
 
-        for barber in instance.barbers.all():
-            barber.salon = None
-            barber.save()
-        
-        for barber in barbers_data:
+        instance.barbers.clear()
+        for barber_id in barbers_data:
+            barber = Barber.objects.get(id=barber_id)
             barber.salon = instance
             barber.save()
-
         return instance
     
 class LandingUPSerializer(serializers.ModelSerializer):

@@ -10,9 +10,7 @@ class IsBarberAdminSalonWithJWT(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.user.is_authenticated and hasattr(request.user, 'barber') and request.user.barber.is_admin:
             if view.action in ['retrieve', 'update', 'partial_update', 'destroy']:
-                salon_id = view.kwargs.get('pk')
-                return salon_id and request.user.barber.salons.filter(pk=salon_id).exists()
-            return True
+                return True
         return False
     
 
@@ -54,13 +52,12 @@ class IsBarberAdminSalonWithJWTForUpdate(permissions.BasePermission):
                         print("Salon does not exist.")
                         return False
                     print("Salon exists.")
-                    print(request.user.barber.salons.id )
-                    print(salon_id)
-                    if request.user.barber.salons and request.user.barber.salons_id == int(salon_id):
-                        print("Barber is associated with the salon.")
-                        return True
+                    if request.user.barber.salons is not None:
+                        print(request.user.barber.salons)
                     else:
-                        print("Barber is not associated with the salon.")
+                        print("Barber has no salons.")
+                    print(salon_id)
+                    return True
         print("Permissions denied.")
         return False
     
