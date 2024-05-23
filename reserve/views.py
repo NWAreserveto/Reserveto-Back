@@ -176,24 +176,42 @@ class SalonViewSet(BarberAdminMixin, mixins.ListModelMixin,
             permission_classes = [IsBarberAdminSalonWithJWT]
         return [permission() for permission in permission_classes]
 
+
+
+
     def get_queryset(self):
         return super().get_queryset()
 
-    def perform_update(self, serializer):
-        # Save the instance to get the updated data
-        instance = serializer.save()
+    def perform_create(self, serializer):
+        salon = serializer.save()
 
-        # Update the list of barbers associated with the salon
-        barbers_data = self.request.data.get('barber', [])
-        instance.barber.set(barbers_data)
+        if 'profile_picture' in self.request.FILES:
+            salon.profile_picture = self.request.FILES['profile_picture']
+            salon.save()
+            
+
+        barbers_data = self.request.data.get('barbers', [])
+        salon.barber.set(barbers_data)
+
+    def perform_update(self, serializer):
+        salon = serializer.save()
+
+        if 'profile_picture' in self.request.FILES:
+            salon.profile_picture = self.request.FILES['profile_picture']
+            salon.save()
+
+        barbers_data = self.request.data.get('barbers', [])
+        salon.barber.set(barbers_data)
 
     def perform_partial_update(self, serializer):
-        # Save the instance to get the updated data
-        instance = serializer.save()
+        salon = serializer.save()
 
-        # Update the list of barbers associated with the salon
-        barbers_data = self.request.data.get('barber', [])
-        instance.barber.set(barbers_data)
+        if 'profile_picture' in self.request.FILES:
+            salon.profile_picture = self.request.FILES['profile_picture']
+            salon.save()
+
+        barbers_data = self.request.data.get('barbers', [])
+        salon.barber.set(barbers_data)
 
 class BarberProfileViewSet(viewsets.ModelViewSet):
     queryset = Barber.objects.all()
@@ -209,9 +227,17 @@ class BarberProfileViewSet(viewsets.ModelViewSet):
             self.permission_classes = [IsAuthenticated]
         return super(BarberProfileViewSet, self).get_permissions()
 
-    def perform_create(self, serializer):
-        serializer.save(barber=self.request.user.barber)
+    def perform_create(self, request ,serializer):
+        user = self.request.user
+        barber = serializer.save(barber=user.barber, context={"request": request})
 
+        
+        if 'profile_picture' in self.request.FILES:
+            barber.profile_picture = self.request.FILES['profile_picture']
+            barber.save()
+            
+
+        return Response(serializer.data)
     def partial_update(self, request, *args, **kwargs):
         user_data = self.request.data.get('user')
         print("Updating barber profile for user:", self.request.user.username) 
@@ -228,22 +254,35 @@ class BarberProfileViewSet(viewsets.ModelViewSet):
                 print("User serializer errors:", user_serializer.errors)  
         barber = self.get_object()
 
-        barber_serializer = BarberSignupSerializer(instance=barber, data=request.data, partial=True)
+        barber_serializer = BarberSerializer(instance=barber, data=request.data, partial=True, context={"request": request})
 
         if not barber_serializer.is_valid():
             return Response(barber_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
         barber_serializer.save()
+
+        if 'profile_picture' in request.FILES:
+            barber.profile_picture = request.FILES['profile_picture']
+            barber.save()
+
         return Response(barber_serializer.data)
 
     def perform_update(self, serializer):
-            user_data = self.request.data.get('user')
-            if user_data:
-                user_serializer = UserSerializer(instance=self.request.user, data=user_data, partial=True)
-                if user_serializer.is_valid(raise_exception=True):
-                    user_serializer.save()
+        user_data = self.request.data.get('user')
 
-            return super().perform_update(serializer)
+        if user_data:
+            user_serializer = UserSerializer(instance=self.request.user, data=user_data, partial=True)
+            if user_serializer.is_valid(raise_exception=True):
+                user_serializer.save()
+
+        barber = serializer.save()
+
+        if 'profile_picture' in self.request.FILES:
+            barber.profile_picture = self.request.FILES['profile_picture']
+            barber.save()
+
+        return super().perform_update(serializer)
 
 class CustomerProfileViewSet(viewsets.ModelViewSet):
     queryset = Customer.objects.all()

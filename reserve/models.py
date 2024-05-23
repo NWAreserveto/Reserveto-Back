@@ -17,7 +17,15 @@ class PasswordReset(models.Model):
 
 
 class Service(models.Model):
-    name = models.CharField(max_length=100)
+    HAIRCUT = 'HC'
+    SHAVE = 'SH'
+    TRIM = 'TR'
+    SERVICE_CHOICES = [
+        (HAIRCUT, 'Haircut'),
+        (SHAVE, 'Shave'),
+        (TRIM, 'Trim'),
+    ]
+    name = models.CharField(max_length=2, choices=SERVICE_CHOICES)
     description = models.TextField()
     price = models.DecimalField(max_digits=12, decimal_places=2)
     duration = models.DurationField()
@@ -117,7 +125,6 @@ class BlockedTimesOfBarber(models.Model):
 
 class Gallery(models.Model):
     barber = models.ForeignKey(Barber, on_delete=models.CASCADE, related_name='gallery_images', null=True, blank=True)
-    salon = models.ForeignKey(Salon, on_delete=models.CASCADE, related_name='gallery_images', null=True, blank=True)
     image = models.ImageField(upload_to='gallery/')
     description = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)

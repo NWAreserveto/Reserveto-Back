@@ -1,5 +1,5 @@
 from .models import *
-# import openai
+import openai
 import os
 
 def get_completion(chat, prompt, message, recent_count=0, model="gpt-4"):
