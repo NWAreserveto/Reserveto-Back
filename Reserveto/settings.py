@@ -96,6 +96,7 @@ WSGI_APPLICATION = 'Reserveto.wsgi.application'
 #     }
 # }
 
+
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.postgresql',
@@ -106,8 +107,6 @@ WSGI_APPLICATION = 'Reserveto.wsgi.application'
 #         'PORT': '5432',
 #     }
 # }
-
-
 
 import dj_database_url 
 # Replace the SQLite DATABASES configuration with PostgreSQL:
