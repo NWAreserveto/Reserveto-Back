@@ -25,9 +25,9 @@ class Service(models.Model):
         (SHAVE, 'Shave'),
         (TRIM, 'Trim'),
     ]
-    name = models.CharField(max_length=2, choices=SERVICE_CHOICES)
+    name = models.CharField(max_length=50, choices=SERVICE_CHOICES)
     description = models.TextField()
-    price = models.DecimalField(max_digits=12, decimal_places=2)
+    price = models.DecimalField(max_digits=20, decimal_places=2)
     duration = models.DurationField()
     salon = models.ForeignKey('Salon', on_delete=models.CASCADE, related_name='services')
     barbers = models.ManyToManyField('Barber', related_name='services', blank=True)
@@ -38,7 +38,7 @@ class Service(models.Model):
 class Salon(models.Model):
     name = models.CharField(max_length=100)
     address = models.CharField(max_length=255)
-    phone_number = models.CharField(max_length=15)
+    phone_number = models.CharField(max_length=150)
     profile_picture = models.ImageField(upload_to='salon_profiles/', blank=True, null=True)
     barber = models.ManyToManyField('Barber', null=True, blank=True , related_name='salon')  
 
