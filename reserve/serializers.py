@@ -112,6 +112,8 @@ class BarberSignupSerializer(serializers.ModelSerializer):
 
 class BarberSerializer(serializers.ModelSerializer):
     user = UserSerializer()
+    profile_picture = serializers.ImageField(required=False)
+
 
     class Meta:
         model = Barber
@@ -136,6 +138,8 @@ class CustomerSignupSerializer(serializers.ModelSerializer):
 
 class CustomerSerializer(serializers.ModelSerializer):
     user = UserSerializer()
+    profile_picture = serializers.ImageField(required=False)
+
 
     class Meta:
         model = Customer
@@ -151,38 +155,23 @@ class PasswordResetSerializer(serializers.Serializer):
 
 class SalonSerializer(serializers.ModelSerializer):
     barbers = serializers.PrimaryKeyRelatedField(queryset=Barber.objects.all(), many=True, required=False)
+    profile_picture = serializers.ImageField(required=False)
+
     class Meta:
         model = Salon
-        fields = ['id', 'name', 'address', 'phone_number', 'barbers']
+        fields = ['id', 'name', 'address', 'phone_number', 'profile_picture', 'barbers']
 
-
-    def validate_name(self, value):
-        if Salon.objects.filter(name=value).exists():
-            raise serializers.ValidationError("A salon with that name already exists.")
-        return value
 
     def create(self, validated_data):
-        barbers_data = validated_data.pop('barber', [])
+        barbers_data = validated_data.pop('barbers', [])  # Get list of barber IDs
         salon = Salon.objects.create(**validated_data)
-        for barber_id in barbers_data:
-            barber = Barber.objects.get(id=barber_id)
-            barber.salon = salon
-            barber.save()
+        salon.barber.set(barbers_data)  # Set the barbers for the salon
         return salon
 
     def update(self, instance, validated_data):
-        barbers_data = self.context['request'].data.get('barbers', [])        
-        instance.name = validated_data.get('name', instance.name)
-        instance.address = validated_data.get('address', instance.address)
-        instance.phone_number = validated_data.get('phone_number', instance.phone_number)
-        instance.profile_picture = validated_data.get('profile_picture', instance.profile_picture)
-        instance.save()
-
-        instance.barbers.clear()
-        for barber_id in barbers_data:
-            barber = Barber.objects.get(id=barber_id)
-            barber.salon = instance
-            barber.save()
+        barbers_data = validated_data.pop('barbers', [])  # Get list of barber IDs
+        instance = super().update(instance, validated_data)
+        instance.barber.set(barbers_data)  # Set the barbers for the salon
         return instance
     
 class LandingUPSerializer(serializers.ModelSerializer):
