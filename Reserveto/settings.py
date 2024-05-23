@@ -95,6 +95,7 @@ WSGI_APPLICATION = 'Reserveto.wsgi.application'
 #         'NAME': BASE_DIR / 'db.sqlite3',
 #     }
 # }
+
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.postgresql',
@@ -105,6 +106,7 @@ WSGI_APPLICATION = 'Reserveto.wsgi.application'
 #         'PORT': '5432',
 #     }
 # }
+
 
 
 import dj_database_url 

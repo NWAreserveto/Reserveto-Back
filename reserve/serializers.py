@@ -114,6 +114,11 @@ class BarberSerializer(serializers.ModelSerializer):
     user = UserSerializer()
     profile_picture = serializers.ImageField(required=False)
 
+    Full_Name = serializers.SerializerMethodField()
+
+    def get_Full_Name(self, obj):
+        return f"{obj.first_name} {obj.last_name}"
+
 
     class Meta:
         model = Barber
@@ -138,7 +143,14 @@ class CustomerSignupSerializer(serializers.ModelSerializer):
 
 class CustomerSerializer(serializers.ModelSerializer):
     user = UserSerializer()
+
     profile_picture = serializers.ImageField(required=False)
+
+
+    Full_Name = serializers.SerializerMethodField()
+
+    def get_Full_Name(self, obj):
+        return f"{obj.first_name} {obj.last_name}"
 
 
     class Meta:
@@ -163,15 +175,15 @@ class SalonSerializer(serializers.ModelSerializer):
 
 
     def create(self, validated_data):
-        barbers_data = validated_data.pop('barbers', [])  # Get list of barber IDs
+        barbers_data = validated_data.pop('barbers', [])  
         salon = Salon.objects.create(**validated_data)
-        salon.barber.set(barbers_data)  # Set the barbers for the salon
+        salon.barber.set(barbers_data)  
         return salon
 
     def update(self, instance, validated_data):
-        barbers_data = validated_data.pop('barbers', [])  # Get list of barber IDs
+        barbers_data = validated_data.pop('barbers', [])  
         instance = super().update(instance, validated_data)
-        instance.barber.set(barbers_data)  # Set the barbers for the salon
+        instance.barber.set(barbers_data)  
         return instance
     
 class LandingUPSerializer(serializers.ModelSerializer):
@@ -240,3 +252,15 @@ class Appointment_Serializer(serializers.ModelSerializer):
      class Meta:
         model = Appointment
         fields = ['start_time', 'end_time']
+
+class ServicesNameSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Service
+        fields = ['name']
+class AppointmentServicesNameSerializer(serializers.ModelSerializer):
+    services = ServicesNameSerializer(many=True) 
+
+    class Meta:
+        model = Appointment
+        fields = ['services','created_at']
+
