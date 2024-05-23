@@ -16,21 +16,32 @@ class PasswordReset(models.Model):
         return f"Username :{self.user.username} + Created at : {self.created} + Expires at : {self.expires_at}  + Token : {self.token}"
 
 
+# class Service(models.Model):
+#     HAIRCUT = 'HC'
+#     SHAVE = 'SH'
+#     TRIM = 'TR'
+#     SERVICE_CHOICES = [
+#         (HAIRCUT, 'Haircut'),
+#         (SHAVE, 'Shave'),
+#         (TRIM, 'Trim'),
+#     ]
+#     name = models.CharField(max_length=50, choices=SERVICE_CHOICES)
+#     description = models.TextField()
+#     price = models.DecimalField(max_digits=20, decimal_places=2)
+#     duration = models.DurationField()
+#     salon = models.ForeignKey('Salon', on_delete=models.CASCADE, related_name='services')
+#     barbers = models.ManyToManyField('Barber', related_name='services', blank=True)
+
 class Service(models.Model):
-    HAIRCUT = 'HC'
-    SHAVE = 'SH'
-    TRIM = 'TR'
-    SERVICE_CHOICES = [
-        (HAIRCUT, 'Haircut'),
-        (SHAVE, 'Shave'),
-        (TRIM, 'Trim'),
-    ]
-    name = models.CharField(max_length=50, choices=SERVICE_CHOICES)
+    name = models.CharField(max_length=100)
     description = models.TextField()
-    price = models.DecimalField(max_digits=20, decimal_places=2)
+    price = models.DecimalField(max_digits=12, decimal_places=2)
     duration = models.DurationField()
     salon = models.ForeignKey('Salon', on_delete=models.CASCADE, related_name='services')
     barbers = models.ManyToManyField('Barber', related_name='services', blank=True)
+
+    def __str__(self):
+        return self.name
 
     def __str__(self):
         return self.name
