@@ -21,14 +21,4 @@ class Migration(migrations.Migration):
             name='phone_number',
             field=models.CharField(max_length=150),
         ),
-        migrations.AlterField(
-            model_name='service',
-            name='name',
-            field=models.CharField(choices=[('HC', 'Haircut'), ('SH', 'Shave'), ('TR', 'Trim')], max_length=50),
-        ),
-        migrations.AlterField(
-            model_name='service',
-            name='price',
-            field=models.DecimalField(decimal_places=2, max_digits=20),
-        ),
     ]
