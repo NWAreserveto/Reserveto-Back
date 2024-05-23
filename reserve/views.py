@@ -21,6 +21,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.utils import timezone
 from django.contrib.auth import authenticate
+from django.db.models import Func , Value
 from .permissions import *
 from rest_framework.permissions import IsAuthenticated
 # import openai
@@ -451,7 +452,7 @@ class BlockedAndAppointmentTimes(generics.ListAPIView):
         }
 
         return Response(response_data)
-from rest_framework.decorators import api_view
+
 
 class AppointmentCreateAPIView(generics.CreateAPIView):
     queryset = Appointment.objects.all()
@@ -462,3 +463,63 @@ class AppointmentCreateAPIView(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+class OrdersOfEachCustumerAPIView(generics.ListAPIView):
+    queryset = Appointment.objects.all()
+    serializer_class = Appointment
+    
+    def get_appointment_queryset(self,Customer_id):
+        return Appointment.objects.filter(customer_id= Customer_id )
+
+    def get_name_queryset(self,Customer_id):
+        return Customer.objects.filter(id = Customer_id)
+
+    def get(self, request, *args, **kwargs):
+        Customer_id = self.kwargs.get('Customer_id')
+
+        queryset_appointmets = self.get_appointment_queryset(Customer_id)
+        queryset_Name = self.get_name_queryset(Customer_id)
+
+        Services_data = AppointmentServicesNameSerializer(queryset_appointmets,many=True).data
+        Name = CustomerSerializer( queryset_Name,many=True).data
+
+        Services_data_name = [f'{item['services']}  {item['created_at']}' for item in Services_data]
+        Name = [item['Full_Name'] for item in Name][0]
+
+        response_data = {
+            'Name' :Name,
+            'Services' :Services_data_name,
+        }
+        return Response(response_data)
+
+class OrdersOfEachBarberAPIView(generics.ListAPIView):
+    queryset = Barber.objects.all()
+    serializer_class = BarberSerializer
+    
+    def get_appointment_queryset(self,barber_id):
+        return Appointment.objects.filter(barber_id = barber_id )
+
+    def get_name_queryset(self,barber_id):
+        return Barber.objects.filter(id = barber_id)
+
+    def get(self, request, *args, **kwargs):
+        barber_id = self.kwargs.get('barber_id')
+
+        queryset_appointmets = self.get_appointment_queryset(barber_id)
+        queryset_Name = self.get_name_queryset(barber_id)
+
+        Services_data = AppointmentServicesNameSerializer(queryset_appointmets,many=True).data
+        Name = BarberSerializer( queryset_Name,many=True).data
+
+        Services_data_name = [f'{item['services']}  {item['created_at']}' for item in Services_data]
+        
+        Name = [item['Full_Name'] for item in Name][0]
+
+        response_data = {
+            'Name' :Name,
+            'Services' :Services_data_name,
+            
+        }
+        return Response(response_data)
+
+  

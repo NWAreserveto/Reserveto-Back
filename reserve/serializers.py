@@ -112,6 +112,10 @@ class BarberSignupSerializer(serializers.ModelSerializer):
 
 class BarberSerializer(serializers.ModelSerializer):
     user = UserSerializer()
+    Full_Name = serializers.SerializerMethodField()
+
+    def get_Full_Name(self, obj):
+        return f"{obj.first_name} {obj.last_name}"
 
     class Meta:
         model = Barber
@@ -136,6 +140,10 @@ class CustomerSignupSerializer(serializers.ModelSerializer):
 
 class CustomerSerializer(serializers.ModelSerializer):
     user = UserSerializer()
+    Full_Name = serializers.SerializerMethodField()
+
+    def get_Full_Name(self, obj):
+        return f"{obj.first_name} {obj.last_name}"
 
     class Meta:
         model = Customer
@@ -254,3 +262,15 @@ class Appointment_Serializer(serializers.ModelSerializer):
      class Meta:
         model = Appointment
         fields = ['start_time', 'end_time']
+
+class ServicesNameSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Service
+        fields = ['name']
+class AppointmentServicesNameSerializer(serializers.ModelSerializer):
+    services = ServicesNameSerializer(many=True) 
+
+    class Meta:
+        model = Appointment
+        fields = ['services','created_at']
+

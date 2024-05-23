@@ -45,4 +45,6 @@ urlpatterns = [
     path('chats/<int:chat_id>/messages/', include(router_message.urls)),
     path('reserve/<int:barber_id>/day/<str:day>/', BlockedAndAppointmentTimes.as_view(), name='blocked_and_appointment_times'),
     path('appointments/', AppointmentCreateAPIView.as_view(), name='appointment-create'),
+    path('C_orders/<int:Customer_id>',OrdersOfEachCustumerAPIView.as_view(),name='Customer_Orders'),
+    path('B_orders/<int:barber_id>',OrdersOfEachBarberAPIView.as_view(),name='Barber_Orders'),
 ]

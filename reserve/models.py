@@ -172,3 +172,5 @@ class GPTCall(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     def __str__(self) -> str:
          return f"{self.prompt[:20]}{self.response[:20]} Total Tokens: {self.tokens}"
+
+    
