@@ -522,7 +522,8 @@ class OrdersOfEachCustumerAPIView(generics.ListAPIView):
         Services_data = AppointmentServicesNameSerializer(queryset_appointmets,many=True).data
         Name = CustomerSerializer( queryset_Name,many=True).data
 
-        Services_data_name = [f'{item['services']}  {item['created_at']}' for item in Services_data]
+        # Services_data_name = [f'{item['services']}  {item['created_at']}' for item in Services_data]
+        Services_data_name = [f"{item['services']}  {item['created_at']}" for item in Services_data]
         Name = [item['Full_Name'] for item in Name][0]
 
         response_data = {
@@ -550,7 +551,7 @@ class OrdersOfEachBarberAPIView(generics.ListAPIView):
         Services_data = AppointmentServicesNameSerializer(queryset_appointmets,many=True).data
         Name = BarberSerializer( queryset_Name,many=True).data
 
-        Services_data_name = [f'{item['services']}  {item['created_at']}' for item in Services_data]
+        Services_data_name = [f"{item['services']}  {item['created_at']}" for item in Services_data]
         
         Name = [item['Full_Name'] for item in Name][0]
 
