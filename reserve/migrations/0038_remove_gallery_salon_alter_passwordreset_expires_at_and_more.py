@@ -20,9 +20,4 @@ class Migration(migrations.Migration):
             name='expires_at',
             field=models.DateTimeField(default=datetime.datetime(2024, 5, 24, 5, 24, 4, 225644, tzinfo=datetime.timezone.utc)),
         ),
-        migrations.AlterField(
-            model_name='service',
-            name='name',
-            field=models.CharField(choices=[('HC', 'Haircut'), ('SH', 'Shave'), ('TR', 'Trim')], max_length=2),
-        ),
     ]

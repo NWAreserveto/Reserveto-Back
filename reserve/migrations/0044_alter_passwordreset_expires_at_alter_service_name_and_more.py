@@ -16,14 +16,5 @@ class Migration(migrations.Migration):
             name='expires_at',
             field=models.DateTimeField(default=datetime.datetime(2024, 5, 24, 7, 26, 6, 948442, tzinfo=datetime.timezone.utc)),
         ),
-        migrations.AlterField(
-            model_name='service',
-            name='name',
-            field=models.CharField(max_length=100),
-        ),
-        migrations.AlterField(
-            model_name='service',
-            name='price',
-            field=models.DecimalField(decimal_places=2, max_digits=12),
-        ),
+
     ]
