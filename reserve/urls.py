@@ -47,4 +47,5 @@ urlpatterns = [
     path('appointments/', AppointmentCreateAPIView.as_view(), name='appointment-create'),
     path('C_orders/<int:Customer_id>',OrdersOfEachCustumerAPIView.as_view(),name='Customer_Orders'),
     path('B_orders/<int:barber_id>',OrdersOfEachBarberAPIView.as_view(),name='Barber_Orders'),
+    path('barbers/<int:barber_id>/stats/', BarberStatsView.as_view(), name='barber-stats'),
 ]
