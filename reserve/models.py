@@ -137,8 +137,8 @@ class BlockedTimesOfBarber(models.Model):
 class Gallery(models.Model):
     barber = models.ForeignKey(Barber, on_delete=models.CASCADE, related_name='gallery_images', null=True, blank=True)
     image = models.ImageField(upload_to='gallery/')
-    description = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
+
 
 class LandingGifs(models.Model):
     gif_name = models.CharField(max_length=255)
@@ -195,4 +195,5 @@ class GPTCall(models.Model):
     def __str__(self) -> str:
          return f"{self.prompt[:20]}{self.response[:20]} Total Tokens: {self.tokens}"
 
+    
     
