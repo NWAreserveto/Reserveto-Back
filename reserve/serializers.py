@@ -124,6 +124,13 @@ class BarberSerializer(serializers.ModelSerializer):
         model = Barber
         fields ='__all__'
 
+
+class BarberStatsSerializer(serializers.Serializer):
+    total_reviews = serializers.IntegerField()
+    average_rating = serializers.FloatField()
+    total_appointments = serializers.IntegerField()
+    
+
 class CustomerSignupSerializer(serializers.ModelSerializer):
     user = UserSerializer()
 

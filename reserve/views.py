@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.views import APIView
+from django.db.models import Avg, Count
 from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
 from .serializers import LoginSerializer
@@ -562,4 +563,25 @@ class OrdersOfEachBarberAPIView(generics.ListAPIView):
         }
         return Response(response_data)
 
-  
+
+class BarberStatsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, barber_id):
+        try:
+            barber = Barber.objects.get(id=barber_id)
+        except Barber.DoesNotExist:
+            return Response({"error": "Barber not found"}, status=404)
+        
+        total_reviews = Review.objects.filter(recipient_barber=barber).count()
+        average_rating = Review.objects.filter(recipient_barber=barber).aggregate(Avg('rating'))['rating__avg'] or 0
+        total_appointments = Appointment.objects.filter(barber=barber).count()
+        
+        stats = {
+            "total_reviews": total_reviews,
+            "average_rating": average_rating,
+            "total_appointments": total_appointments
+        }
+        
+        serializer = BarberStatsSerializer(stats)
+        return Response(serializer.data)
