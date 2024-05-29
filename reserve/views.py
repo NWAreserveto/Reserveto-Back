@@ -523,7 +523,6 @@ class OrdersOfEachCustumerAPIView(generics.ListAPIView):
         Services_data = AppointmentServicesNameSerializer(queryset_appointmets,many=True).data
         Name = CustomerSerializer( queryset_Name,many=True).data
 
-        # Services_data_name = [f'{item['services']}  {item['created_at']}' for item in Services_data]
         Services_data_name = [f"{item['services']}  {item['created_at']}" for item in Services_data]
         Name = [item['Full_Name'] for item in Name][0]
 
@@ -571,7 +570,7 @@ class BarberStatsView(APIView):
         try:
             barber = Barber.objects.get(id=barber_id)
         except Barber.DoesNotExist:
-            return Response({"error": "Barber not found"}, status=404)
+            return Response({"error": "Barber not found"},  status=status.HTTP_404_NOT_FOUND)
         
         total_reviews = Review.objects.filter(recipient_barber=barber).count()
         average_rating = Review.objects.filter(recipient_barber=barber).aggregate(Avg('rating'))['rating__avg'] or 0
@@ -584,4 +583,37 @@ class BarberStatsView(APIView):
         }
         
         serializer = BarberStatsSerializer(stats)
-        return Response(serializer.data)
+        return Response(serializer.data,status=status.HTTP_200_OK)
+    
+
+class GalleryListView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request, barber_id):
+        try:
+            barber = Barber.objects.get(id=barber_id)
+        except Barber.DoesNotExist:
+            return Response({"error": "Barber not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        gallery_images = Gallery.objects.filter(barber=barber)
+        serializer = GallerySerializer(gallery_images, many=True,context={"request": request})
+        return Response(serializer.data,status=status.HTTP_200_OK)
+
+class GalleryCreateView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request, barber_id):
+        try:
+            barber = Barber.objects.get(id=barber_id)
+        except Barber.DoesNotExist:
+            return Response({"error": "Barber not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        files = request.FILES.getlist('images')
+
+        if not files:
+            return Response({"error": "No images provided"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        for file in files:
+            Gallery.objects.create(barber=barber, image=file)
+        
+        return Response({"message": "Images uploaded successfully"}, status=status.HTTP_201_CREATED)

@@ -271,3 +271,14 @@ class AppointmentServicesNameSerializer(serializers.ModelSerializer):
         model = Appointment
         fields = ['services','created_at']
 
+
+class GallerySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Gallery
+        fields = ['id', 'barber', 'image','created_at']
+
+class MultipleGallerySerializer(serializers.Serializer):
+    images = serializers.ListField(
+        child=serializers.ImageField(),
+        allow_empty=False
+    )
