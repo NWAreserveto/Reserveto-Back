@@ -18,4 +18,6 @@ admin.site.register(Chat)
 admin.site.register(Message)
 admin.site.register(GPTCall)
 admin.site.register(BlockedTimesOfBarber)
+admin.site.register(Notification)
+admin.site.register(Customer_cart)
 

@@ -3,6 +3,7 @@ from rest_framework.viewsets import GenericViewSet
 from rest_framework.mixins import DestroyModelMixin, UpdateModelMixin
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
+from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.views import APIView
 from django.db.models import Avg, Count
@@ -80,7 +81,7 @@ class BarberSignupAPIView(APIView):
         serializer = BarberSignupSerializer(data=request.data)
         if serializer.is_valid():
             barber = serializer.save()
-            refresh = RefreshToken.for_user(barber)
+            refresh = RefreshToken.for_user(barber.user)
             return Response({
                 'access': str(refresh.access_token),
                 'refresh': str(refresh),
@@ -537,7 +538,7 @@ class OrdersOfEachBarberAPIView(generics.ListAPIView):
     serializer_class = BarberSerializer
     
     def get_appointment_queryset(self,barber_id):
-        return Appointment.objects.filter(barber_id = barber_id )
+        return Appointment.objects.filter(barber_id = barber_id ,barber_status=1,customer_status=1)
 
     def get_name_queryset(self,barber_id):
         return Barber.objects.filter(id = barber_id)
@@ -574,7 +575,7 @@ class BarberStatsView(APIView):
         
         total_reviews = Review.objects.filter(recipient_barber=barber).count()
         average_rating = Review.objects.filter(recipient_barber=barber).aggregate(Avg('rating'))['rating__avg'] or 0
-        total_appointments = Appointment.objects.filter(barber=barber).count()
+        total_appointments = Appointment.objects.filter(barber=barber,customer_status=1,barber_status=1).count()
         
         stats = {
             "total_reviews": total_reviews,
@@ -617,3 +618,150 @@ class GalleryCreateView(APIView):
             Gallery.objects.create(barber=barber, image=file)
         
         return Response({"message": "Images uploaded successfully"}, status=status.HTTP_201_CREATED)
+    
+
+
+class NotificationViewSet(viewsets.ModelViewSet):
+    queryset = Notification.objects.all()
+    serializer_class = NotificationSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return self.queryset.filter(appointment__barber__user=self.request.user)
+
+    @action(detail=True, methods=['post'])
+    def mark_as_read(self, request, pk=None):
+        notification = self.get_object()
+        notification.is_read = True
+        notification.save()
+        return Response({'status': 'notification marked as read'})
+
+    @action(detail=True, methods=['post'])
+    def confirm_appointment(self, request, pk=None):
+        notification = self.get_object()
+        appointment = notification.appointment
+        # appointment = Appointment.objects.get(pk = appointment_id)
+        if appointment.barber.user != request.user:
+            return Response({'status': 'not allowed'}, status=status.HTTP_403_FORBIDDEN)
+        
+        serializer = AppointmentConfirmBarberSerializer(appointment, data={'barber_status': 1}, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'status': 'appointment confirmed'})
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    @action(detail=True, methods=['post'])
+    def reject_appointment(self, request, pk=None):
+        notification = self.get_object()
+        appointment = notification.appointment
+        if appointment.barber.user != request.user:
+            return Response({'status': 'not allowed'}, status=status.HTTP_403_FORBIDDEN)
+
+        serializer = AppointmentConfirmBarberSerializer(appointment, data={'barber_status': -1}, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'status': 'appointment rejected'})
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+class CustomerOrderConfirm(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, appointment_id):
+        try:
+            appointment = Appointment.objects.get(id=appointment_id)
+            appointment.customer_status = 1
+            appointment.save()
+            return Response({'detail': 'Appointment confirmed by Customer'}, status=status.HTTP_200_OK)
+        except Appointment.DoesNotExist:
+            return Response({'detail': 'Appointment not found'}, status=status.HTTP_404_NOT_FOUND)
+
+class CustomerOrderReject(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, appointment_id):
+        try:
+            appointment = Appointment.objects.get(id=appointment_id)
+            appointment.customer_status = -1
+            appointment.save()
+            return Response({'detail': 'Appointment rejected by Customer'}, status=status.HTTP_200_OK)
+        except Appointment.DoesNotExist:
+            return Response({'detail': 'Appointment not found'}, status=status.HTTP_404_NOT_FOUND)
+
+class BarberOrderConfirm(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, appointment_id):
+        try:
+            appointment = Appointment.objects.get(id=appointment_id)
+            appointment.barber_status = 1
+            appointment.save()
+            return Response({'detail': 'Appointment confirmed bu Barber'}, status=status.HTTP_200_OK)
+        except Appointment.DoesNotExist:
+            return Response({'detail': 'Appointment not found'}, status=status.HTTP_404_NOT_FOUND)
+
+class BarberOrderReject(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, appointment_id):
+        try:
+            appointment = Appointment.objects.get(id=appointment_id)
+            appointment.barber_status = -1
+            appointment.save()
+            return Response({'detail': 'Appointment rejected by Customer'}, status=status.HTTP_200_OK)
+        except Appointment.DoesNotExist:
+            return Response({'detail': 'Appointment not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+class ConfirmCartView(APIView):
+    def post(self, request, cart_id):
+        try:
+            cart = Customer_cart.objects.get(id=cart_id)
+            for appointment in cart.appointments.all():
+                appointment.customer_status = 1
+                appointment.save()
+            return Response({'detail': 'Cart confirmed'}, status=status.HTTP_200_OK)
+        except Customer_cart.DoesNotExist:
+            return Response({'detail': 'Cart not found'}, status=status.HTTP_404_NOT_FOUND)
+
+class RejectCartView(APIView):
+    def post(self, request, cart_id):
+        try:
+            cart = Customer_cart.objects.get(id=cart_id)
+            for appointment in cart.appointments.all():
+                appointment.customer_status = -1
+                appointment.save()
+            return Response({'detail': 'Cart rejected'}, status=status.HTTP_200_OK)
+        except Customer_cart.DoesNotExist:
+            return Response({'detail': 'Cart not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+class CartCreateAPIView(generics.ListCreateAPIView):
+    queryset = Customer_cart.objects.all()
+    serializer_class = CustomerCartSerializer
+    
+    def create(self, request, *args, **kwargs):
+        appointments = request.data.get('appointments', [])
+        
+        if not appointments:
+            return Response({"detail": "No appointments provided."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        customer = request.user.customer
+        cart = Customer_cart.objects.create(customer=customer)
+        
+        for appointment_id in appointments:
+            appointment = get_object_or_404(Appointment, id=appointment_id)
+            cart.appointments.add(appointment)
+        
+        serializer = self.get_serializer(cart)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+
+class AllServicesAPIView(generics.ListCreateAPIView):
+    queryset = Service.objects.all()
+    serializer_class = ServiceSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    

@@ -193,6 +193,11 @@ class SalonSerializer(serializers.ModelSerializer):
         instance.barber.set(barbers_data)  
         return instance
     
+    def validate_name(self, value):
+        if Salon.objects.filter(name=value).exists():
+            raise serializers.ValidationError("Salon with this name already exists.")
+        return value
+    
 class LandingUPSerializer(serializers.ModelSerializer):
     class Meta:
         model =LandingUP
@@ -271,7 +276,19 @@ class AppointmentServicesNameSerializer(serializers.ModelSerializer):
         model = Appointment
         fields = ['services','created_at']
 
+class AppointmentConfirmBarberSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Appointment
+        fields = ['barber_status']
 
+
+class CustomerCartSerializer(serializers.ModelSerializer):
+    appointments = AppointmentSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Customer_cart
+        fields = ['id', 'customer', 'appointments', 'created_at', 'updated_at']
+        
 class GallerySerializer(serializers.ModelSerializer):
     class Meta:
         model = Gallery
@@ -282,3 +299,23 @@ class MultipleGallerySerializer(serializers.Serializer):
         child=serializers.ImageField(),
         allow_empty=False
     )
+
+
+
+class NotificationSerializer(serializers.ModelSerializer):
+    appointment = AppointmentSerializer()
+
+    class Meta:
+        model = Notification
+        fields = '__all__'
+
+
+class ServiceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Service
+        fields = '__all__'
+
+    def validate_name(self, value):
+        if Service.objects.filter(name=value).exists():
+            raise serializers.ValidationError("Service with this name already exists.")
+        return value

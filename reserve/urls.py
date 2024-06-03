@@ -9,6 +9,8 @@ from . import views
 router_chat = SimpleRouter()
 router_chat.register(r'', ChatViewset, basename='Chat')
 
+router_notification = SimpleRouter()
+router_notification.register(r'notifications', NotificationViewSet, basename = 'Notification')
 
 router_message = SimpleRouter()
 router_message.register(r'', MessageViewset, basename='Message')
@@ -50,4 +52,13 @@ urlpatterns = [
     path('barbers/<int:barber_id>/stats/', BarberStatsView.as_view(), name='barber-stats'),
     path('barbers/<int:barber_id>/gallery/', GalleryListView.as_view(), name='gallery-list'),
     path('barbers/<int:barber_id>/gallery/upload/', GalleryCreateView.as_view(), name='gallery-upload'),
+    path('', include(router_notification.urls)),
+    path('notifications/<int:notification_id>/confirm_appointment/', NotificationViewSet.as_view({'post': 'confirm_appointment'}), name='confirm_appointment'),
+    path('notifications/<int:notification_id>/reject_appointment/', NotificationViewSet.as_view({'post': 'reject_appointment'}), name='reject_appointment'),
+    path('cart/', CartCreateAPIView.as_view(), name='cart-create'),
+    path('cart/<int:cart_id>/confirm/', ConfirmCartView.as_view(), name='confirm-cart'),
+    path('cart/<int:cart_id>/reject/', RejectCartView.as_view(), name='reject-cart'),
+    path('appointment/<int:appointment_id>/confirm/', CustomerOrderConfirm.as_view(), name='confirm-appointment'),
+    path('appointment/<int:appointment_id>/reject/', CustomerOrderReject.as_view(), name='reject-appointment'),
+    path('allservices/', AllServicesAPIView.as_view(), name='all-services'),
 ]
