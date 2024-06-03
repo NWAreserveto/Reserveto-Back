@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from django.db import models
 import uuid
+from django.core.exceptions import ValidationError
 from django.utils import timezone
 from django.contrib.auth.models import AbstractUser
 
@@ -115,16 +116,38 @@ class ResponseMessage(models.Model):
 
 
 class Appointment(models.Model):
+    STATUS_CHOICES = [
+        (-1, 'Rejected'),
+        (0, 'Stall'),
+        (1, 'Confirmed'),
+    ]
+
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='bookings')
     services = models.ManyToManyField(Service, related_name='appointments')
     barber = models.ForeignKey(Barber, on_delete=models.CASCADE, related_name='bookings')
     day = models.DateField(auto_now=True)
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
+    barber_status = models.IntegerField(choices=STATUS_CHOICES, default=0)
+    customer_status = models.IntegerField(choices=STATUS_CHOICES, default=0)
     created_at = models.DateTimeField(auto_now_add=True)
 
+
+    def clean(self):
+        if self.barber_status not in dict(self.STATUS_CHOICES):
+            raise ValidationError(('Invalid value for barber_status'))
+        if self.customer_status not in dict(self.STATUS_CHOICES):
+            raise ValidationError(('Invalid value for customer_status'))
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
+
     def __str__(self):
-        return f"{self.customer.user.username} - {', '.join([service.name for service in self.services.all()])} - {self.barber.user.username} - {self.start_time}"    
+        return f"{self.customer.user.username} - {', '.join([service.name for service in self.services.all()])} - {self.barber.user.username} - {self.start_time} - Barber Status :{self.barber_status} - Customer_Status :{self.customer_status}"    
+
+
+
 
 
 class BlockedTimesOfBarber(models.Model):
@@ -197,3 +220,20 @@ class GPTCall(models.Model):
 
     
     
+class Notification(models.Model):
+    # customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='notifications')
+    appointment = models.ForeignKey(Appointment, on_delete=models.CASCADE, related_name='notifications')
+    message = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)
+    def __str__(self):
+        return self.message
+        
+    
+class Customer_cart(models.Model):
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='cart')
+    appointments= models.ManyToManyField(Appointment, related_name='cart')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    def __str__(self):
+        return f"{self.customer.user.username} - {', '.join([service.name for service in self.services.all()])}"
