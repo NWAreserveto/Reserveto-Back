@@ -765,3 +765,20 @@ class AllServicesAPIView(generics.ListCreateAPIView):
         self.perform_create(serializer)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     
+class BookmarksAPIView(generics.ListCreateAPIView):
+    queryset = Bookmark.objects.all()
+    serializer_class = BookmarkSerializer
+
+    def get_bookmarks_queryset(self,customer_id):
+        return Bookmark.objects.all().filter(customer_id = customer_id)
+    
+    def get(self, request, *args, **kwargs):
+        customer_id = self.kwargs.get('customer_id')
+        queryset = self.get_bookmarks_queryset(customer_id)
+        serializer_data = BookmarkSerializer(queryset,many=True).data
+        return Response(serializer_data)
+    def post(self, request, *args, **kwargs):
+        serializer = BookmarkSerializer(data= request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        return Response(serializer.data,status=status.HTTP_201_CREATED)

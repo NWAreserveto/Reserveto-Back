@@ -319,3 +319,7 @@ class ServiceSerializer(serializers.ModelSerializer):
         if Service.objects.filter(name=value).exists():
             raise serializers.ValidationError("Service with this name already exists.")
         return value
+class BookmarkSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Bookmark
+        fields = '__all__'

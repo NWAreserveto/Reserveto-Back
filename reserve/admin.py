@@ -20,4 +20,5 @@ admin.site.register(GPTCall)
 admin.site.register(BlockedTimesOfBarber)
 admin.site.register(Notification)
 admin.site.register(Customer_cart)
+admin.site.register(Bookmark)
 
