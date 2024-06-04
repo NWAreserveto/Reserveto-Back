@@ -61,4 +61,5 @@ urlpatterns = [
     path('appointment/<int:appointment_id>/confirm/', CustomerOrderConfirm.as_view(), name='confirm-appointment'),
     path('appointment/<int:appointment_id>/reject/', CustomerOrderReject.as_view(), name='reject-appointment'),
     path('allservices/', AllServicesAPIView.as_view(), name='all-services'),
+    path('customers/<int:customer_id>/bookmarks/', BookmarksAPIView.as_view(),name='bookmarks'),
 ]
