@@ -795,3 +795,59 @@ class BookmarksAPIView(generics.ListCreateAPIView):
         
         bookmark.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+
+class CreateRequestView(generics.CreateAPIView):
+    queryset = Request.objects.all()
+    serializer_class = RequestSerializer
+    permission_classes = [IsBarber]
+
+    def perform_create(self, serializer):
+        serializer.save()
+
+class ApproveRejectRequestView(generics.UpdateAPIView):
+    queryset = Request.objects.all()
+    serializer_class = RequestSerializer
+    permission_classes = [IsBarberAdminSalonWithJWT]
+
+    def update(self, request, *args, **kwargs):
+        request_obj = self.get_object()
+
+        status_choice = request.data.get('status')
+        if status_choice not in ['approved', 'rejected']:
+            return Response({'detail': 'Invalid status choice.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        request_obj.status = status_choice
+        request_obj.save()
+
+        if status_choice == 'approved':
+            request_obj.barber.salon.add(request_obj.salon)
+
+        return Response(RequestSerializer(request_obj).data)
+    
+
+
+class BarberRequestsView(generics.ListAPIView):
+    serializer_class = RequestSerializer
+    permission_classes = [IsBarber]
+
+    def get_queryset(self):
+        barber = self.request.user.barber
+        status = self.request.query_params.get('status')
+        if status:
+            return barber.requests.filter(status=status)
+        return barber.requests.all()
+
+class SalonRequestsView(generics.ListAPIView):
+    serializer_class = RequestSerializer
+    permission_classes = [IsBarberAdminSalonWithJWT]
+
+    def get_queryset(self):
+        salon_id = self.kwargs.get('salon_id')
+        salon = get_object_or_404(Salon, id=salon_id)
+        salon_owner = salon.barber
+        print(salon_owner)
+        status = self.request.query_params.get('status')
+        if status:
+            return Request.objects.filter(salon=salon, status=status)
+        return Request.objects.filter(salon=salon)

@@ -62,4 +62,8 @@ urlpatterns = [
     path('appointment/<int:appointment_id>/reject/', CustomerOrderReject.as_view(), name='reject-appointment'),
     path('allservices/', AllServicesAPIView.as_view(), name='all-services'),
     path('customers/<int:customer_id>/bookmarks/', BookmarksAPIView.as_view(),name='bookmarks'),
+    path('barbers/<int:salon_id>/requests/', CreateRequestView.as_view(), name='create-request'),
+    path('barbers/admin/requests/confirmation/<int:pk>/', ApproveRejectRequestView.as_view(), name='approve-reject-request'),
+    path('barbers/requests/', BarberRequestsView.as_view(), name='barber-requests'),
+    path('salon/<int:salon_id>/requests/', SalonRequestsView.as_view(), name='salon-requests'),
 ]

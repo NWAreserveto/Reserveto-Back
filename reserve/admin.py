@@ -21,4 +21,5 @@ admin.site.register(BlockedTimesOfBarber)
 admin.site.register(Notification)
 admin.site.register(Customer_cart)
 admin.site.register(Bookmark)
+admin.site.register(Request)
 

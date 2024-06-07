@@ -323,3 +323,26 @@ class BookmarkSerializer(serializers.ModelSerializer):
     class Meta:
         model = Bookmark
         fields = '__all__'
+
+
+class RequestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Request
+        fields = '__all__'
+        read_only_fields = ('barber', 'salon')
+    
+
+    def validate(self, data):
+        request = self.context['request']
+        barber = request.user.barber
+        salon_id = request.parser_context['kwargs']['salon_id']
+        if Request.objects.filter(barber=barber, salon_id=salon_id, status='pending').exists():
+            raise serializers.ValidationError("You have already sent a pending request to this salon.")
+        return data
+
+    def create(self, validated_data):
+        request = self.context['request']
+        barber = request.user.barber
+        salon_id = request.parser_context['kwargs']['salon_id']
+        salon = Salon.objects.get(id=salon_id)
+        return Request.objects.create(barber=barber, salon=salon, **validated_data)

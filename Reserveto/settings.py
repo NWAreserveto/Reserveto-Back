@@ -102,7 +102,7 @@ WSGI_APPLICATION = 'Reserveto.wsgi.application'
 #         'ENGINE': 'django.db.backends.postgresql',
 #         'NAME': 'Reserveto',
 #         'USER': 'postgres',
-#         'PASSWORD': '1',
+#         'PASSWORD': '13822003',
 #         'HOST': 'localhost',
 #         'PORT': '5432',
 #     }
