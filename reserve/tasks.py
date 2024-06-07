@@ -7,7 +7,7 @@ def get_completion(chat, prompt, message, recent_count=0, model="gpt-4"):
 
     messages.append({"role": "system", "content": prompt})
     messages.append({"role": "user", "content": message})
-    openai.api_key = os.environ.get("GPT_TOKEN","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")
+    openai.api_key = os.environ["GPT_TOKEN"]
     response = openai.ChatCompletion.create(
         model=model,
         messages=messages,
