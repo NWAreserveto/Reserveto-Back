@@ -263,7 +263,7 @@ class AppointmentSerializer(serializers.ModelSerializer):
 class Appointment_Serializer(serializers.ModelSerializer):
      class Meta:
         model = Appointment
-        fields = ['start_time', 'end_time']
+        fields = ['start_time', 'end_time', 'service']
 
 class ServicesNameSerializer(serializers.ModelSerializer):
     class Meta:
