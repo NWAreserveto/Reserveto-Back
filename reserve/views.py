@@ -476,6 +476,7 @@ class BlockedAndAppointmentTimes(generics.ListAPIView):
 
     def get_queryset_appointment_times(self, barber_id, day):
         return Appointment.objects.filter(barber_id=barber_id, day=day)
+        
 
     def get(self, request, *args, **kwargs):
         barber_id = self.kwargs.get('barber_id')
@@ -485,11 +486,12 @@ class BlockedAndAppointmentTimes(generics.ListAPIView):
         queryset_appointment_times = self.get_queryset_appointment_times(barber_id, day)
 
         blocked_times_data = BlockedTimesOfBarberSerializer(queryset_blocked_times, many=True).data
-        appointment_times_data = Appointment_Serializer(queryset_appointment_times, many=True).data
+        appointment_times_and_services_data = Appointment_Serializer(queryset_appointment_times, many=True).data
 
         response_data = {
             'blocked_times': blocked_times_data,
-            'appointment_times': appointment_times_data
+            'appointment_times_with_service_name': appointment_times_and_services_data
+
         }
 
         return Response(response_data)
@@ -777,8 +779,19 @@ class BookmarksAPIView(generics.ListCreateAPIView):
         queryset = self.get_bookmarks_queryset(customer_id)
         serializer_data = BookmarkSerializer(queryset,many=True).data
         return Response(serializer_data)
+    
     def post(self, request, *args, **kwargs):
         serializer = BookmarkSerializer(data= request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         return Response(serializer.data,status=status.HTTP_201_CREATED)
+    
+    def delete(self, request, *args, **kwargs):
+        customer_id = self.kwargs.get('customer_id')
+        try:
+            bookmark = Bookmark.objects.filter(customer_od=customer_id)
+        except Bookmark.DoesNotExist:
+            return Response({'error': 'Bookmark not found'} ,status=status.HTTP_405_METHOD_NOT_ALLOWED )
+        
+        bookmark.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
