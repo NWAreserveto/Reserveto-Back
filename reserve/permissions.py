@@ -44,13 +44,14 @@ class CanRespondToReview(permissions.BasePermission):
     """
 
     def has_permission(self, request, view):
-        if request.user.is_authenticated and hasattr(request.user, 'barber') and request.user.barber.is_admin:
+        if request.user.is_authenticated and hasattr(request.user, 'barber'):
             print(request.data)
             review_id = view.kwargs.get('review_id')  # Assuming the review ID is passed in the request data
             if review_id:
                 try:
                     review = Review.objects.get(pk=review_id)
-                    return True
+                    if review.recipient_barber == request.user.barber:
+                        return True
                 except Review.DoesNotExist:
                     return False  # Review does not exist, permission denied
         return False

@@ -475,15 +475,20 @@ class BlockedAndAppointmentTimes(generics.ListAPIView):
         return BlockedTimesOfBarber.objects.filter(barber_id=barber_id, day=day)
 
     def get_queryset_appointment_times(self, barber_id, day):
-        return Appointment.objects.filter(barber_id=barber_id, day=day)
+        return Appointment.objects.filter(barber_id=barber_id, day=day, barber_status=1 , customer_status=1)
         
 
     def get(self, request, *args, **kwargs):
         barber_id = self.kwargs.get('barber_id')
         day = self.kwargs.get('day')
 
+        print(f"barber_id: {barber_id}, day: {day}")
+
         queryset_blocked_times = self.get_queryset_blocked_times(barber_id, day)
+
         queryset_appointment_times = self.get_queryset_appointment_times(barber_id, day)
+        print(f"Blocked times queryset: {queryset_blocked_times}")
+        print(f"Appointment times queryset: {queryset_appointment_times}")
 
         blocked_times_data = BlockedTimesOfBarberSerializer(queryset_blocked_times, many=True).data
         appointment_times_and_services_data = Appointment_Serializer(queryset_appointment_times, many=True).data
