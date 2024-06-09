@@ -41,6 +41,17 @@ class Salon(models.Model):
 
     def __str__(self):
         return self.name
+    
+
+class Review(models.Model):
+    reviewer = models.ForeignKey('Customer', on_delete=models.CASCADE, related_name='reviews')
+    recipient_barber = models.ForeignKey('Barber', on_delete=models.CASCADE, related_name='reviews')
+    rating = models.PositiveSmallIntegerField()
+    comment = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    images = models.ImageField(upload_to='review_images', null=True, blank=True)
+    def __str__(self):
+        return f"{self.reviewer.user.username} - {self.recipient_barber.user.username} - {self.rating}"
 
 class Barber(models.Model):
     first_name = models.CharField(max_length = 256)
@@ -55,6 +66,9 @@ class Barber(models.Model):
     is_admin = models.BooleanField(default=False)  
     bio = models.TextField(blank=True, null=True)
     profile_picture = models.ImageField(upload_to='barber_profiles/', blank=True, null=True)
+    average_rating = models.DecimalField(max_digits=3, decimal_places=2, default=0.00)
+
+
     def __str__(self):
         return self.user.username
     
@@ -77,15 +91,7 @@ class Customer(models.Model):
 
 
     
-class Review(models.Model):
-    reviewer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='reviews')
-    recipient_barber = models.ForeignKey(Barber, on_delete=models.CASCADE, related_name='reviews')
-    rating = models.PositiveSmallIntegerField()
-    comment = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
-    images = models.ImageField(upload_to='review_images', null=True, blank=True)
-    def __str__(self):
-        return f"{self.reviewer.user.username} - {self.recipient_barber.user.username} - {self.rating}"
+
     
 
 class ResponseMessage(models.Model):
