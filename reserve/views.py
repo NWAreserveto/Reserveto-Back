@@ -743,23 +743,34 @@ class RejectCartView(APIView):
 class CartCreateAPIView(generics.ListCreateAPIView):
     queryset = Customer_cart.objects.all()
     serializer_class = CustomerCartSerializer
+    permission_classes = [IsAuthenticated]
     
     def create(self, request, *args, **kwargs):
-        appointments = request.data.get('appointments', [])
+        appointments_data = request.data.get('appointments', [])
         
-        if not appointments:
+        if not appointments_data:
             return Response({"detail": "No appointments provided."}, status=status.HTTP_400_BAD_REQUEST)
         
         customer = request.user.customer
+        
         cart = Customer_cart.objects.create(customer=customer)
         
-        for appointment_id in appointments:
+        for appointment_data in appointments_data:
+            appointment_id = appointment_data.get('id')
             appointment = get_object_or_404(Appointment, id=appointment_id)
             cart.appointments.add(appointment)
         
         serializer = self.get_serializer(cart)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-    
+
+class CartListAPIView(generics.ListAPIView):
+    serializer_class = CustomerCartSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        customer = self.request.user.customer
+        return Customer_cart.objects.filter(customer=customer)
+
 
 class AllServicesAPIView(generics.ListCreateAPIView):
     queryset = Service.objects.all()

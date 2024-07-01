@@ -227,8 +227,9 @@ class Customer_cart(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     def __str__(self):
-        return f"{self.customer.user.username} - {', '.join([service.name for service in self.services.all()])}"
+        return f"{self.customer.user.username} - {', '.join([service.name for service in self.appointments.services.all()])}"
     
+
 
 class Bookmark(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)

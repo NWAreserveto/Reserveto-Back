@@ -56,6 +56,7 @@ urlpatterns = [
     path('notifications/<int:notification_id>/confirm_appointment/', NotificationViewSet.as_view({'post': 'confirm_appointment'}), name='confirm_appointment'),
     path('notifications/<int:notification_id>/reject_appointment/', NotificationViewSet.as_view({'post': 'reject_appointment'}), name='reject_appointment'),
     path('cart/', CartCreateAPIView.as_view(), name='cart-create'),
+    path('cart/list/', CartListAPIView.as_view(), name='cart-list'), 
     path('cart/<int:cart_id>/confirm/', ConfirmCartView.as_view(), name='confirm-cart'),
     path('cart/<int:cart_id>/reject/', RejectCartView.as_view(), name='reject-cart'),
     path('appointment/<int:appointment_id>/confirm/', CustomerOrderConfirm.as_view(), name='confirm-appointment'),
