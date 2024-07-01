@@ -226,9 +226,8 @@ class Customer_cart(models.Model):
     appointments= models.ManyToManyField(Appointment, related_name='cart')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    def __str__(self):
-        return f"{self.customer.user.username} - {', '.join([service.name for service in self.appointments.services.all()])}"
     
+        
 
 
 class Bookmark(models.Model):
