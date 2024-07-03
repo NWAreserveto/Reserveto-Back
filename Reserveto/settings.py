@@ -113,7 +113,7 @@ import dj_database_url
 DATABASES = {
     'default': dj_database_url.config(
                 # Replace this value with your local database's connection string. 
-                default='postgres://database_t14q_user:5eJY1UjetomZjjkIyNlNGEPwOO8ai1yC@dpg-co6nmva0si5c73cjg0f0-a.oregon-postgres.render.com/database_t14q', 
+                default='postgresql://db_2fys_user:JcRR1ppe2NWuoS8zuvgYpOoWLi7OrND9@dpg-cq2fnq3v2p9s73ersqa0-a.oregon-postgres.render.com/db_2fys', 
                 conn_max_age=600    )}
 
 
