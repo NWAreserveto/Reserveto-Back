@@ -747,7 +747,7 @@ class CartCreateAPIView(generics.ListCreateAPIView):
     
     def create(self, request, *args, **kwargs):
         appointments_data = request.data.get('appointments', [])
-        
+        # print(appointment_data)
         if not appointments_data:
             return Response({"detail": "No appointments provided."}, status=status.HTTP_400_BAD_REQUEST)
         
