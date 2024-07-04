@@ -49,7 +49,8 @@ urlpatterns = [
     path('appointments/', AppointmentCreateAPIView.as_view(), name='appointment-create'),
     path('C_orders/<int:Customer_id>',OrdersOfEachCustumerAPIView.as_view(),name='Customer_Orders'),
     path('B_orders/<int:barber_id>',OrdersOfEachBarberAPIView.as_view(),name='Barber_Orders'),
-    path('barbers/<int:barber_id>/stats/', BarberStatsView.as_view(), name='barber-stats'),
+    path('barbers/<int:id>/barber-hours/', BarberHoursUpdateView.as_view(), name='barber_hours_update'),
+    path('barbers/stats/', BarberStatsView.as_view(), name='barber-stats'),
     path('barbers/<int:barber_id>/gallery/', GalleryListView.as_view(), name='gallery-list'),
     path('barbers/<int:barber_id>/gallery/upload/', GalleryCreateView.as_view(), name='gallery-upload'),
     path('', include(router_notification.urls)),
@@ -67,4 +68,6 @@ urlpatterns = [
     path('barbers/admin/requests/confirmation/<int:pk>/', ApproveRejectRequestView.as_view(), name='approve-reject-request'),
     path('barbers/requests/', BarberRequestsView.as_view(), name='barber-requests'),
     path('salon/<int:salon_id>/requests/', SalonRequestsView.as_view(), name='salon-requests'),
+    path('blocked-times/', BlockedTimeCreateView.as_view(), name='blocked_times_create'),
+
 ]
