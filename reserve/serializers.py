@@ -255,10 +255,20 @@ class BlockedTimesOfBarberSerializer(serializers.ModelSerializer):
         model = BlockedTimesOfBarber
         fields = ['start_time','end_time']
 
+class BlockedTimeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BlockedTimesOfBarber
+        fields = ['barber', 'day', 'start_time', 'end_time']
+
+class BarberHoursSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Barber
+        fields = ['start_hour', 'end_hour']
+
 class AppointmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Appointment
-        fields = ['id', 'customer', 'services', 'barber', 'day','start_time', 'end_time', 'created_at']
+        fields = ['id', 'customer', 'services', 'barber', 'day','start_time', 'end_time','barber_status','customer_status', 'created_at']
 
 class Appointment_Serializer(serializers.ModelSerializer):
      class Meta:

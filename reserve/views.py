@@ -513,64 +513,43 @@ class AppointmentCreateAPIView(generics.CreateAPIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     
 class OrdersOfEachCustumerAPIView(generics.ListAPIView):
-    queryset = Appointment.objects.all()
-    serializer_class = Appointment
-    
-    def get_appointment_queryset(self,Customer_id):
-        return Appointment.objects.filter(customer_id= Customer_id )
-
-    def get_name_queryset(self,Customer_id):
-        return Customer.objects.filter(id = Customer_id)
+    queryset = Customer.objects.all()
+    serializer_class = CustomerSerializer
 
     def get(self, request, *args, **kwargs):
-        Customer_id = self.kwargs.get('Customer_id')
+        customer_id = self.kwargs.get('Customer_id') 
+        customer = get_object_or_404(Customer,pk=customer_id)
+        full_name = f"{customer.first_name} {customer.last_name}"
 
-        queryset_appointmets = self.get_appointment_queryset(Customer_id)
-        queryset_Name = self.get_name_queryset(Customer_id)
-
-        Services_data = AppointmentServicesNameSerializer(queryset_appointmets,many=True).data
-        Name = CustomerSerializer( queryset_Name,many=True).data
-
-        Services_data_name = [f"{item['services']}  {item['created_at']}" for item in Services_data]
-        Name = [item['Full_Name'] for item in Name][0]
+        appointments = Appointment.objects.filter(customer_id=customer_id)
+        serialized_appointments = AppointmentSerializer(appointments, many=True).data
 
         response_data = {
-            'Name' :Name,
-            'Services' :Services_data_name,
+            'Name': full_name,
+            'Appointments': serialized_appointments,
         }
+
         return Response(response_data)
 
 class OrdersOfEachBarberAPIView(generics.ListAPIView):
     queryset = Barber.objects.all()
     serializer_class = BarberSerializer
-    
-    def get_appointment_queryset(self,barber_id):
-        return Appointment.objects.filter(barber_id = barber_id ,barber_status=1,customer_status=1)
-
-    def get_name_queryset(self,barber_id):
-        return Barber.objects.filter(id = barber_id)
 
     def get(self, request, *args, **kwargs):
-        barber_id = self.kwargs.get('barber_id')
+        barber_id = self.kwargs.get('barber_id') 
+        barber = get_object_or_404(Barber,pk=barber_id)
+        full_name = f"{barber.first_name} {barber.last_name}"
 
-        queryset_appointmets = self.get_appointment_queryset(barber_id)
-        queryset_Name = self.get_name_queryset(barber_id)
-
-        Services_data = AppointmentServicesNameSerializer(queryset_appointmets,many=True).data
-        Name = BarberSerializer( queryset_Name,many=True).data
-
-        Services_data_name = [f"{item['services']}  {item['created_at']}" for item in Services_data]
-        
-        Name = [item['Full_Name'] for item in Name][0]
+        appointments = Appointment.objects.filter(barber_id=barber_id)
+        serialized_appointments = AppointmentSerializer(appointments, many=True).data
 
         response_data = {
-            'Name' :Name,
-            'Services' :Services_data_name,
-            
+            'Name': full_name,
+            'Appointments': serialized_appointments,
         }
+
         return Response(response_data)
-
-
+    
 class BarberStatsView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -867,3 +846,17 @@ class SalonRequestsView(generics.ListAPIView):
         if status:
             return Request.objects.filter(salon=salon, status=status)
         return Request.objects.filter(salon=salon)
+    
+
+class BlockedTimeCreateView(generics.CreateAPIView):
+    permission_classes = [AllowAny]
+
+    queryset = BlockedTimesOfBarber.objects.all()
+    serializer_class = BlockedTimeSerializer
+
+class BarberHoursUpdateView(generics.UpdateAPIView):
+    permission_classes = [AllowAny]
+
+    queryset = Barber.objects.all()
+    serializer_class = BarberHoursSerializer
+    lookup_field = 'id'
