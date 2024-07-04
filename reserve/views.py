@@ -339,6 +339,12 @@ class BarberReviewsAPIView(generics.ListCreateAPIView):
         barber = Barber.objects.get(pk=barber_id)
         reviewer = self.request.user.customer
         serializer.save(reviewer=reviewer, recipient_barber=barber)
+        reviews = Review.objects.filter(recipient_barber_id=barber_id)
+        average_rating = reviews.aggregate(Avg('rating'))['rating__avg']
+        review_count = reviews.count()
+        barber.review_count = review_count
+        barber.average_rating = average_rating
+        barber.save()
 
 class SalonReviewsAPIView(generics.ListCreateAPIView):
     queryset = Review.objects.all()
@@ -849,13 +855,13 @@ class SalonRequestsView(generics.ListAPIView):
     
 
 class BlockedTimeCreateView(generics.CreateAPIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsBarber]
 
     queryset = BlockedTimesOfBarber.objects.all()
     serializer_class = BlockedTimeSerializer
 
 class BarberHoursUpdateView(generics.UpdateAPIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsBarber]
 
     queryset = Barber.objects.all()
     serializer_class = BarberHoursSerializer
