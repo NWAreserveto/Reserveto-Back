@@ -817,6 +817,9 @@ class ApproveRejectRequestView(generics.UpdateAPIView):
         status_choice = request.data.get('status')
         if status_choice not in ['approved', 'rejected']:
             return Response({'detail': 'Invalid status choice.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        if not request.user.barber.salon.filter(id=request_obj.salon.id).exists():
+            return Response({'detail': 'Not authorized to approve/reject this request.'}, status=status.HTTP_403_FORBIDDEN)
 
         request_obj.status = status_choice
         request_obj.save()
